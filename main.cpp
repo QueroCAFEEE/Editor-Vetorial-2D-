@@ -15,7 +15,7 @@ int numLines;
 // INI MOD
 ListaD* listaPolig = (ListaD*)malloc(sizeof(ListaD));
 Desenho* atual;
-double escala = 0.0;
+
 char op = 'D';
 
 int primeiro_vertice = 1;
@@ -180,30 +180,8 @@ static void key(unsigned char key, int x, int y)
 
     case '+':
         //redimensionar
-        //escala += 0.20
-        escala_desenho(atual,1.02);
         break;
-    case '-':
-        //redimensionar
-        //escala -= 0.20
-    escala_desenho(atual,0.98);
-    break;
-
-    case 'e':
-    rotacao_desenho(atual,0.01);
-    break;
-
-    case 'k':
-    rotacao_desenho(atual,-0.01);
-    break;
-
     }
-
-    /*if(escala < 0.2) {
-		escala = 0.2;
-	} else if(escala > 1.02) {
-		escala = 1.02;
-	}*/
 
     glutPostRedisplay();
 }
