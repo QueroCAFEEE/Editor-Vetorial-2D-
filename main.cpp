@@ -1,4 +1,70 @@
-#include <windows.h>
+typedef struct color{
+    double r;
+    double g;
+    double b;
+    double t;
+}Cor;
+
+typedef struct vert{
+    //Info
+    int x;
+    int y;
+
+    //Ponteiros
+    struct vert *prox;
+    struct vert *ant;
+}Vertice;
+
+typedef struct des{
+    //Info
+    int ordemDesenho;
+    Cor corPolig;
+    int qtdVertices;
+    //Ponteiros
+    Vertice *vertices;
+    struct des *prox;
+    struct des *ant;
+}Desenho;
+
+ typedef struct listaDesenhos{
+    Desenho* head;
+ }ListaD;
+
+/*
+ *  <Função>:             inicia_desenho.
+ *  <Parametros>:         Não recebe parametros.
+ *  <Funcionalidade>:     Inicializa a estrutura de desenho, aloca o espaço na memoria.
+ *  <Retorno>:            Ponteiro para o Desenho.
+ */
+Desenho* inicia_desenho();
+
+/*
+ *  <Função>:             cria_vertice
+ *  <Parametros>:         Recebe como parametros os as coordenadas X e Y do vertice (Double)
+ *  <Funcionalidade>:     Inicializa a estrutura de vertice, aloca o espaço na memoria, atribui os valores.
+ *  <Retorno>:            Ponteiro para o Desenho.
+ */
+Vertice* cria_vertice(int x,int y);
+
+void imprime_cor(Cor c);
+
+void imprime_vertices(Vertice* ve);
+
+void imprime_info_desenhos(ListaD* lista);
+
+void adiciona_vertice_desenho(Desenho* pol,Vertice* ve);
+
+void adiciona_novo_desenho(ListaD* lista, Desenho* novo);
+
+Desenho* clica_desenho(ListaD* lista, int x, int y);
+
+void move_desenho(Desenho* pol, int varx,int vary);
+
+void apaga_desenho(ListaD* lista,Desenho* pol);
+
+void escala_desenho(Desenho* pol, double escala);
+
+void rotacao_desenho(Desenho* pol, float angulo);#include <windows.h>
 #include <stdio.h>
 #include "ListaDesenhos.h"
 
@@ -15,7 +81,7 @@ int numLines;
 // INI MOD
 ListaD* listaPolig = (ListaD*)malloc(sizeof(ListaD));
 Desenho* atual;
-
+double escala = 0.0;
 char op = 'D';
 
 int primeiro_vertice = 1;
@@ -180,8 +246,30 @@ static void key(unsigned char key, int x, int y)
 
     case '+':
         //redimensionar
+        //escala += 0.20
+        escala_desenho(atual,1.02);
         break;
+    case '-':
+        //redimensionar
+        //escala -= 0.20
+    escala_desenho(atual,0.98);
+    break;
+
+    case 'e':
+    rotacao_desenho(atual,0.01);
+    break;
+
+    case 'k':
+    rotacao_desenho(atual,-0.01);
+    break;
+
     }
+
+    /*if(escala < 0.2) {
+		escala = 0.2;
+	} else if(escala > 1.02) {
+		escala = 1.02;
+	}*/
 
     glutPostRedisplay();
 }
