@@ -75,7 +75,7 @@ void imprime_info_desenhos(ListaD* lista)
 
 void adiciona_vertice_desenho(Desenho* pol,Vertice* ve)
 {
-    if(!pol->vertices) //Logo não contem nenhum vertice.
+    if(!pol->vertices) //Logo nÃ£o contem nenhum vertice.
     {
         pol->vertices = ve;
         pol->qtdVertices++;
@@ -208,4 +208,33 @@ void apaga_desenho(ListaD* lista,Desenho* pol)
         }
     }
     free(pol);
+}
+// Scaling the Polygon
+void scale(int x[], int y[], int sx, int sy)
+{
+    // Triangle before Scaling
+    line(x[0], y[0], x[1], y[1]);
+    line(x[1], y[1], x[2], y[2]);
+    line(x[2], y[2], x[0], y[0]);
+
+    // Initializing the Scaling Matrix.
+    int s[2][2] = { sx, 0, 0, sy };
+    int p[2][1];
+
+    // Scaling the triangle
+    for (int i = 0; i < 3; i++)
+    {
+        p[0][0] = x[i];
+        p[1][0] = y[i];
+
+        findNewCoordinate(s, p);
+
+        x[i] = p[0][0];
+        y[i] = p[1][0];
+    }
+
+    // Triangle after Scaling
+    line(x[0], y[0], x[1], y[1]);
+    line(x[1], y[1], x[2], y[2]);
+    line(x[2], y[2], x[0], y[0]);
 }
