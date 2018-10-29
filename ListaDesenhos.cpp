@@ -78,7 +78,7 @@ void imprime_info_desenhos(ListaD* lista)
 
 void adiciona_vertice_desenho(Desenho* pol,Vertice* ve)
 {
-    if(!pol->vertices) //Logo n„o contem nenhum vertice.
+    if(!pol->vertices) //Logo n√£o contem nenhum vertice.
     {
         pol->vertices = ve;
         ve->ant = NULL;
@@ -234,6 +234,51 @@ void escala_desenho(Desenho* pol, double escala)
             tmp_vert->y *= escala;
             tmp_vert = tmp_vert->prox;
         }
+    }
+}
+
+void espelhamento(Desenho* pol)
+{
+    int maxX;
+    int flg_first = 1;
+
+    Vertice* tmp_vertice = pol->vertices;
+
+    while(tmp_vertice)
+    {
+        if(flg_first)
+        {
+            maxX = tmp_vertice->x;
+            flg_first = 0;
+        }
+        else
+        {
+            if(tmp_vertice->x > maxX)
+            {
+                maxX = tmp_vertice->x;
+            }
+        }
+        tmp_vertice = tmp_vertice->prox;
+    }
+
+    if(pol->vertices)
+    {
+        int i = 0;
+        Vertice* new_vert = pol->vertices;
+        Vertice* tmp_vert = pol->vertices;
+
+        while(new_vert != NULL)
+        {
+            new_vert->x = maxX+(maxX - (tmp_vert->x));
+            new_vert->y = tmp_vert->y;
+            //printf("x[%d]': %d\n", i, new_vert->x);
+            //printf("y[%d]': %d\n", i, new_vert->y);
+            //printf("\n");
+            new_vert = tmp_vert->prox;
+            tmp_vert = tmp_vert->prox;
+            i++;
+        }
+        //printf("---------------------\n");
     }
 }
 
@@ -404,10 +449,10 @@ point baricentro(Desenho* poligono)
         retorno.y = minY + ((maxY - minY)/2);
         return retorno;
     }else{
-        printf("Erro: Poligono n„o possuÌ vertices.\n");
+        printf("Erro: Poligono n√£o possu√≠ vertices.\n");
     }
     /*
-    Exemplo para utilizar a funÁ„o:
+    Exemplo para utilizar a fun√ß√£o:
         point bar = baricentro(atual);
         printf("Baricentro do Envelope:\nX:%d\nY:%d\n",bar.x,bar.y);
     */
