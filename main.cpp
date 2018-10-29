@@ -208,6 +208,11 @@ static void key(unsigned char key, int x, int y)
             escala_desenho(atual,0.98);
         }
         break;
+            
+    case 'r':
+        espelhamento(atual);
+        break;            
+            
     case 'j':
         salva_arquivo("test.txt",listaPolig);
         break;
@@ -250,7 +255,7 @@ void createMenu()
 
 /*
     <init>:
-    Inicializa alguns aspectos b·sicos para o funcionamento da aplicaÁ„o.
+    Inicializa alguns aspectos b√°sicos para o funcionamento da aplica√ß√£o.
 */
 void init()
 {
@@ -364,25 +369,25 @@ void mousedrag(int x, int y)
 
 int main(int argc, char ** argv)
 {
-    //InicializaÁıes
+    //Inicializa√ß√µes
     listaPolig->head = NULL;
     atual = NULL;
 
     /*
         <glutInit>:
-        Inicializa a biblioteca GLUT e negocia a sess„o junto com o sistema de janela.
-        Neste processo, glutInit pode provocar a finalizaÁ„o da aplicaÁ„o GLUT, enviando
-        uma mensagem de erro ao usu·rio indicando que n„o pode ser inicializada apropriadamente.
+        Inicializa a biblioteca GLUT e negocia a sess√£o junto com o sistema de janela.
+        Neste processo, glutInit pode provocar a finaliza√ß√£o da aplica√ß√£o GLUT, enviando
+        uma mensagem de erro ao usu√°rio indicando que n√£o pode ser inicializada apropriadamente.
     */
     glutInit(&argc, argv);
 
     /*
         <glutInitDisplayMode>:
-        Avisa a GLUT que tipo de modo de exibiÁ„o deve ser usado quando a janela È criada.
-        Neste caso os argumentos indicam a criaÁ„o de uma janela single-buffered (GLUT_SINGLE)
+        Avisa a GLUT que tipo de modo de exibi√ß√£o deve ser usado quando a janela √© criada.
+        Neste caso os argumentos indicam a cria√ß√£o de uma janela single-buffered (GLUT_SINGLE)
         com o modo de cores RGBA (GLUT_RGB). O primeiro significa que todos os comandos de
-        desenho s„o feitos na janela de exibiÁ„o.O modo de cores RGBA significa que as cores
-        s„o especificadas atravÈs do fornecimento de intensidades dos componentes red, green
+        desenho s√£o feitos na janela de exibi√ß√£o.O modo de cores RGBA significa que as cores
+        s√£o especificadas atrav√©s do fornecimento de intensidades dos componentes red, green
         e blue separadas.
 
     */
@@ -390,7 +395,7 @@ int main(int argc, char ** argv)
 
     /*
         <glutInitWindowPosition>:
-        Define a posiÁ„o inicial da janela.
+        Define a posi√ß√£o inicial da janela.
     */
     glutInitWindowPosition(100,100);
 
@@ -402,43 +407,43 @@ int main(int argc, char ** argv)
 
     /*
         <glutCreateWindow>:
-        È o comando da biblioteca GLUT que cria a janela. Neste caso, È criada uma janela com o
-        nome "Editor 2D OpenGL/GLUT". Este argumento corresponde a legenda para a barra de tÌtulo
+        √© o comando da biblioteca GLUT que cria a janela. Neste caso, √© criada uma janela com o
+        nome "Editor 2D OpenGL/GLUT". Este argumento corresponde a legenda para a barra de t√≠tulo
         da janela.
     */
     glutCreateWindow("Editor 2D OpenGL/GLUT");
 
     /*
         <glutReshapeFunc>:
-        Define a funÁ„o que ser· chamada quando a janela atual sofrer alteraÁıes em suas dimensıes.
-        Passa como argumento as novas dimensıes para a funÁ„o.
+        Define a fun√ß√£o que ser√° chamada quando a janela atual sofrer altera√ß√µes em suas dimens√µes.
+        Passa como argumento as novas dimens√µes para a fun√ß√£o.
     */
     glutReshapeFunc(reshape);
 
     /*
         <glutDisplayFunc>:
-        Define a funÁ„o que ser· chamada quando a janela atual necessita ser redesenhada/desenhada.
+        Define a fun√ß√£o que ser√° chamada quando a janela atual necessita ser redesenhada/desenhada.
     */
     glutDisplayFunc(display);
 
     /*
         <glutKeyboardFunc>:
-        Determina a funÁ„o de manipulaÁ„o de comandos do teclado da janela atual.
+        Determina a fun√ß√£o de manipula√ß√£o de comandos do teclado da janela atual.
     */
     glutKeyboardFunc(key);
 
     /*
         <glutMouseFunc>:
-        Determina a funÁ„o de controle para comandos do mouse da janela atual.
+        Determina a fun√ß√£o de controle para comandos do mouse da janela atual.
 
     */
     glutMouseFunc(mouseclick);
 
     /*
         <glutPassiveMotionFunc>:
-        Estabelece a funÁ„o que È chamada pela GLUT cada vez que o mouse È movido sobre a janela corrente
-        enquanto nenhum de seus botıes est· pressionado. Par‚metros de entrada da funÁ„o callback:
-        (int x, int y). Os par‚metros x e y indicam a posiÁ„o do mouse em coordenadas da janela.
+        Estabelece a fun√ß√£o que √© chamada pela GLUT cada vez que o mouse √© movido sobre a janela corrente
+        enquanto nenhum de seus bot√µes est√° pressionado. Par√¢metros de entrada da fun√ß√£o callback:
+        (int x, int y). Os par√¢metros x e y indicam a posi√ß√£o do mouse em coordenadas da janela.
     */
     glutPassiveMotionFunc(mousedrag);
 
