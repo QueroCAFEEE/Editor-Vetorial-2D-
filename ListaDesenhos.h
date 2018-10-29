@@ -1,3 +1,9 @@
+typedef struct pt
+{
+    int x;
+    int y;
+} point;
+
 typedef struct color{
     double r;
     double g;
@@ -61,3 +67,13 @@ Desenho* clica_desenho(ListaD* lista, int x, int y);
 void move_desenho(Desenho* pol, int varx,int vary);
 
 void apaga_desenho(ListaD* lista,Desenho* pol);
+
+void escala_desenho(Desenho* pol, double escala);
+
+int salva_arquivo(char* nome,ListaD* desenhos);
+
+ListaD* carrega_arquivo(char* nome);
+
+double distancia_entre_2pt(int x1,int x2,int y1,int y2);
+
+point baricentro(Desenho* poligono);
