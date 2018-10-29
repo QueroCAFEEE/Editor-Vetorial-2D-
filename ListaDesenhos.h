@@ -37,17 +37,17 @@ typedef struct des{
  }ListaD;
 
 /*
- *  <Função>:             inicia_desenho.
- *  <Parametros>:         Não recebe parametros.
- *  <Funcionalidade>:     Inicializa a estrutura de desenho, aloca o espaço na memoria.
+ *  <FunÃ§Ã£o>:             inicia_desenho.
+ *  <Parametros>:         NÃ£o recebe parametros.
+ *  <Funcionalidade>:     Inicializa a estrutura de desenho, aloca o espaÃ§o na memoria.
  *  <Retorno>:            Ponteiro para o Desenho.
  */
 Desenho* inicia_desenho();
 
 /*
- *  <Função>:             cria_vertice
+ *  <FunÃ§Ã£o>:             cria_vertice
  *  <Parametros>:         Recebe como parametros os as coordenadas X e Y do vertice (Double)
- *  <Funcionalidade>:     Inicializa a estrutura de vertice, aloca o espaço na memoria, atribui os valores.
+ *  <Funcionalidade>:     Inicializa a estrutura de vertice, aloca o espaÃ§o na memoria, atribui os valores.
  *  <Retorno>:            Ponteiro para o Desenho.
  */
 Vertice* cria_vertice(int x,int y);
@@ -69,6 +69,8 @@ void move_desenho(Desenho* pol, int varx,int vary);
 void apaga_desenho(ListaD* lista,Desenho* pol);
 
 void escala_desenho(Desenho* pol, double escala);
+
+void espelhamento(Desenho* pol);
 
 int salva_arquivo(char* nome,ListaD* desenhos);
 
