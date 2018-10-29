@@ -1,6 +1,9 @@
 #include "ListaDesenhos.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
+#include <ctype.h>
+#include <math.h>
 
 using namespace std;
 
@@ -78,6 +81,7 @@ void adiciona_vertice_desenho(Desenho* pol,Vertice* ve)
     if(!pol->vertices) //Logo não contem nenhum vertice.
     {
         pol->vertices = ve;
+        ve->ant = NULL;
         pol->qtdVertices++;
     }
     else
@@ -191,21 +195,220 @@ void move_desenho(Desenho* pol, int varx,int vary)
 
 void apaga_desenho(ListaD* lista,Desenho* pol)
 {
-    if(pol->ant == NULL){//remove o primeiro desenho
-        if(pol->prox != NULL){
-                printf("TESTE\n");
+    if(pol->ant == NULL) //remove o primeiro desenho
+    {
+        if(pol->prox != NULL)
+        {
             lista->head = pol->prox;
             pol->prox->ant = NULL;
-        }else{
+        }
+        else
+        {
             lista->head = NULL;
         }
-    }else{
-        if(pol->prox != NULL){
+    }
+    else
+    {
+        if(pol->prox != NULL)
+        {
             pol->prox->ant = pol->ant;
             pol->ant->prox = pol->prox;
-        }else{
+        }
+        else
+        {
             pol->ant->prox = NULL;
         }
     }
     free(pol);
+}
+
+void escala_desenho(Desenho* pol, double escala)
+{
+    if(pol->vertices)
+    {
+        Vertice* tmp_vert = pol->vertices;
+
+        while(tmp_vert != NULL)
+        {
+            tmp_vert->x *= escala;
+            tmp_vert->y *= escala;
+            tmp_vert = tmp_vert->prox;
+        }
+    }
+}
+
+int salva_arquivo(char* nome,ListaD* desenhos)
+{
+    FILE* arq;
+    arq = fopen(nome,"w+");
+    if(arq == NULL)
+    {
+        printf("Erro ao abrir arquivo.\n");
+        return -1;
+    }
+    Desenho* tmp = desenhos->head;
+    while(tmp != NULL)
+    {
+        fprintf(arq,"D\n");
+        fprintf(arq,"%f,%f,%f,%f\n",tmp->corPolig.r,tmp->corPolig.g,tmp->corPolig.b,tmp->corPolig.t);
+        if(tmp->vertices != NULL)
+        {
+            Vertice* tmp_v = tmp->vertices;
+            while(tmp_v != NULL)
+            {
+                fprintf(arq,"%d,%d ",tmp_v->x,tmp_v->y);
+                tmp_v = tmp_v->prox;
+            }
+        }
+        tmp=tmp->prox;
+        fprintf(arq,"\n");
+    }
+
+    fclose(arq);
+}
+
+ListaD* carrega_arquivo(char* nome)
+{
+    FILE* arq;
+    arq = fopen(nome,"r+");
+    ListaD* lista = (ListaD*)malloc(sizeof(ListaD));
+    lista->head = NULL;
+
+    char ch;
+    if(arq == NULL)
+    {
+        printf("Problema ao abrir arquivo.\n");
+    }
+    while((ch=fgetc(arq)) != EOF)
+    {
+        printf("%c",ch);
+        if(ch == 'D')
+        {
+            Desenho* novo = inicia_desenho();
+            fgetc(arq);
+            int contador = 0;
+
+            char arrayCor[4][8]= {NULL};
+            int index = 0;
+
+            //Ler cores
+            while((ch=fgetc(arq)) != '\n')
+            {
+                if(ch != ',')
+                {
+                    arrayCor[index][contador]=ch;
+                    contador++;
+                }
+                else if(ch == ',')
+                {
+                    index++;
+                    contador = 0;
+                }
+            }
+            novo->corPolig.r = atof(arrayCor[0]);
+            novo->corPolig.g = atof(arrayCor[1]);
+            novo->corPolig.b = atof(arrayCor[2]);
+            novo->corPolig.t = atof(arrayCor[3]);
+
+            char arrayVerticeX[100]= {NULL};
+            char arrayVerticeY[100]= {NULL};
+            index = 0;
+            Vertice* n_vert = NULL;
+            int flg_y=0;
+
+            while((ch=fgetc(arq)) != '\n')
+            {
+                if((ch != ',' && !isspace(ch))&& flg_y == 0)
+                {
+                    arrayVerticeX[index]=ch;
+                    index++;
+                }
+                else if((ch != ',' && !isspace(ch))&& flg_y ==1)
+                {
+                    arrayVerticeY[index]=ch;
+                    index++;
+                }
+                else if(ch == ',')
+                {
+                    flg_y = 1;
+                    index = 0;
+                }
+                else if(isspace(ch))
+                {
+                    flg_y = 0;
+                    index = 0;
+                    n_vert = cria_vertice(atoi(arrayVerticeX),atoi(arrayVerticeY));
+                    adiciona_vertice_desenho(novo,n_vert);
+                    n_vert = NULL;
+
+                    int k;
+                    for(k=0; k<100; k++)
+                    {
+                        arrayVerticeX[k]=' ';
+                        arrayVerticeY[k]=' ';
+                    }
+
+                }
+            }
+            adiciona_novo_desenho(lista,novo);
+        }
+    }
+    return lista;
+}
+
+double distancia_entre_2pt(int x1,int x2,int y1,int y2)
+{
+    return sqrt(pow(x2-x1,2)+pow(y2-y1,2));
+}
+
+point baricentro(Desenho* poligono)
+{
+    int minX,minY,maxX,maxY;
+    point retorno;
+    int flg_first = 1;
+    if(poligono->vertices)
+    {
+        Vertice* tmp_vertice = poligono->vertices;
+        while(tmp_vertice)
+        {
+            if(flg_first)
+            {
+                minX = tmp_vertice->x;
+                minY = tmp_vertice->y;
+                maxX = tmp_vertice->x;
+                maxY = tmp_vertice->y;
+                flg_first = 0;
+            }
+            else
+            {
+                if(tmp_vertice->x < minX)
+                {
+                    minX = tmp_vertice->x;
+                }
+                else if(tmp_vertice->x > maxX)
+                {
+                    maxX = tmp_vertice->x;
+                }
+                if(tmp_vertice->y < minY)
+                {
+                    minY = tmp_vertice->y;
+                }
+                else if(tmp_vertice->y > maxY)
+                {
+                    maxY = tmp_vertice->y;
+                }
+            }
+            tmp_vertice = tmp_vertice->prox;
+        }
+        retorno.x = minX + ((maxX - minX)/2);
+        retorno.y = minY + ((maxY - minY)/2);
+        return retorno;
+    }else{
+        printf("Erro: Poligono não possuí vertices.\n");
+    }
+    /*
+    Exemplo para utilizar a função:
+        point bar = baricentro(atual);
+        printf("Baricentro do Envelope:\nX:%d\nY:%d\n",bar.x,bar.y);
+    */
 }

@@ -1,6 +1,9 @@
 #include <windows.h>
 #include <stdio.h>
 #include "ListaDesenhos.h"
+#include <math.h>
+
+using namespace std;
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -23,12 +26,6 @@ int primeiro_vertice = 1;
 int movendo = 0;
 
 // END MOD
-
-typedef struct point
-{
-    int x;
-    int y;
-} point;
 
 point rastro[2];
 point drag[2];
@@ -84,10 +81,20 @@ void drawlines()
             if(tmp_vert)
             {
                 glColor3d(tmp_des->corPolig.r,tmp_des->corPolig.g,tmp_des->corPolig.b);
-                glBegin(GL_POLYGON);
+                glBegin(GL_LINES);
                 while(tmp_vert!=NULL)
                 {
+
                     glVertex2i(tmp_vert->x, gHeight-tmp_vert->y);
+                    if(tmp_vert->prox != NULL)
+                    {
+                        glVertex2i(tmp_vert->prox->x, gHeight-tmp_vert->prox->y);
+                    }
+                    else if(tmp_des != atual)
+                    {
+                        glVertex2i(tmp_des->vertices->x, gHeight-tmp_des->vertices->y);
+                    }
+
                     tmp_vert = tmp_vert->prox;
                 }
                 glEnd();
@@ -145,10 +152,19 @@ void menufunc(int val)
         break;
 
     case 5:
-        if(atual != NULL){
+        if(atual != NULL)
+        {
             apaga_desenho(listaPolig,atual);
             glutPostRedisplay();
         }
+        break;
+
+    case 6:
+        salva_arquivo("test.txt",listaPolig);
+        break;
+
+    case 7:
+        listaPolig = carrega_arquivo("test.txt");
         break;
 
     case 9:
@@ -180,7 +196,28 @@ static void key(unsigned char key, int x, int y)
 
     case '+':
         //redimensionar
+        if(atual != NULL)
+        {
+            escala_desenho(atual,1.02);
+        }
         break;
+    case '-':
+        //redimensionar
+        if(atual != NULL)
+        {
+            escala_desenho(atual,0.98);
+        }
+        break;
+    case 'j':
+        salva_arquivo("test.txt",listaPolig);
+        break;
+    case 'k':
+        listaPolig = carrega_arquivo("test.txt");
+        break;
+    case 'i':
+        imprime_info_desenhos(listaPolig);
+        break;
+
     }
 
     glutPostRedisplay();
@@ -198,13 +235,23 @@ void createMenu()
     glutAddMenuEntry("Mover",4);
     glutAddMenuEntry("Apagar",5);
 
+    int menuArquivo = glutCreateMenu(menufunc);
+    glutAddMenuEntry("Salvar",6);
+    glutAddMenuEntry("Carregar",7);
+
     int menu=glutCreateMenu(menufunc);
     glutAddSubMenu("Editar",menuEditar);
     glutAddSubMenu("Cores",menuCor);
+    glutAddSubMenu("Arquivo",menuArquivo);
     glutAddMenuEntry("Sair",9);
 
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
+
+/*
+    <init>:
+    Inicializa alguns aspectos básicos para o funcionamento da aplicação.
+*/
 void init()
 {
     glClearColor(0,0,0,1);
@@ -242,10 +289,17 @@ void mouseclick(int button, int state,int x, int y)
             }
             else
             {
-                Vertice* v = cria_vertice(x,y);
-                adiciona_vertice_desenho(atual,v);
+                if(distancia_entre_2pt(atual->vertices->x,x,atual->vertices->y,y) < 5.0)
+                {
+                    op = 'X';
+                    primeiro_vertice = 1;
+                }
+                else
+                {
+                    Vertice* v = cria_vertice(x,y);
+                    adiciona_vertice_desenho(atual,v);
+                }
             }
-
             rastro[0].x=x;
             rastro[0].y=y;
             rastro[1].x=x;
@@ -310,19 +364,82 @@ void mousedrag(int x, int y)
 
 int main(int argc, char ** argv)
 {
+    //Inicializações
     listaPolig->head = NULL;
     atual = NULL;
 
-    // ###
+    /*
+        <glutInit>:
+        Inicializa a biblioteca GLUT e negocia a sessão junto com o sistema de janela.
+        Neste processo, glutInit pode provocar a finalização da aplicação GLUT, enviando
+        uma mensagem de erro ao usuário indicando que não pode ser inicializada apropriadamente.
+    */
     glutInit(&argc, argv);
+
+    /*
+        <glutInitDisplayMode>:
+        Avisa a GLUT que tipo de modo de exibição deve ser usado quando a janela é criada.
+        Neste caso os argumentos indicam a criação de uma janela single-buffered (GLUT_SINGLE)
+        com o modo de cores RGBA (GLUT_RGB). O primeiro significa que todos os comandos de
+        desenho são feitos na janela de exibição.O modo de cores RGBA significa que as cores
+        são especificadas através do fornecimento de intensidades dos componentes red, green
+        e blue separadas.
+
+    */
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+
+    /*
+        <glutInitWindowPosition>:
+        Define a posição inicial da janela.
+    */
     glutInitWindowPosition(100,100);
+
+    /*
+        <glutInitWindowSize>:
+        Define o tamanho inicial da janela;
+    */
     glutInitWindowSize(800,600);
+
+    /*
+        <glutCreateWindow>:
+        é o comando da biblioteca GLUT que cria a janela. Neste caso, é criada uma janela com o
+        nome "Editor 2D OpenGL/GLUT". Este argumento corresponde a legenda para a barra de título
+        da janela.
+    */
     glutCreateWindow("Editor 2D OpenGL/GLUT");
+
+    /*
+        <glutReshapeFunc>:
+        Define a função que será chamada quando a janela atual sofrer alterações em suas dimensões.
+        Passa como argumento as novas dimensões para a função.
+    */
     glutReshapeFunc(reshape);
+
+    /*
+        <glutDisplayFunc>:
+        Define a função que será chamada quando a janela atual necessita ser redesenhada/desenhada.
+    */
     glutDisplayFunc(display);
+
+    /*
+        <glutKeyboardFunc>:
+        Determina a função de manipulação de comandos do teclado da janela atual.
+    */
     glutKeyboardFunc(key);
+
+    /*
+        <glutMouseFunc>:
+        Determina a função de controle para comandos do mouse da janela atual.
+
+    */
     glutMouseFunc(mouseclick);
+
+    /*
+        <glutPassiveMotionFunc>:
+        Estabelece a função que é chamada pela GLUT cada vez que o mouse é movido sobre a janela corrente
+        enquanto nenhum de seus botões está pressionado. Parâmetros de entrada da função callback:
+        (int x, int y). Os parâmetros x e y indicam a posição do mouse em coordenadas da janela.
+    */
     glutPassiveMotionFunc(mousedrag);
 
     init();
