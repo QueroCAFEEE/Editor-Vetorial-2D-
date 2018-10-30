@@ -79,3 +79,5 @@ ListaD* carrega_arquivo(char* nome);
 double distancia_entre_2pt(int x1,int x2,int y1,int y2);
 
 point baricentro(Desenho* poligono);
+
+void rotacao_desenho(Desenho* pol, float angulo);
