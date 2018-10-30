@@ -457,3 +457,30 @@ point baricentro(Desenho* poligono)
         printf("Baricentro do Envelope:\nX:%d\nY:%d\n",bar.x,bar.y);
     */
 }
+void rotacao_desenho(Desenho* pol, float angulo){
+   float s = sin(angulo);
+   float c = cos(angulo);
+   point bar = baricentro(pol);;
+
+   int difX;
+   int difY;
+
+    if(pol->vertices)
+    {
+        Vertice* tmp_vert = pol->vertices;
+
+        while(tmp_vert != NULL)
+        {
+            difX = (tmp_vert->x - bar.x);
+            difY = (tmp_vert ->y - bar.y);
+
+            float newX = ((difX * c) - (difY * s)) ;
+            float newY = ((difX * s) + (difY * c));
+
+            tmp_vert->x = newX + bar.x;
+            tmp_vert->y = newY + bar.y;
+            tmp_vert = tmp_vert->prox;
+        }
+
+    }
+}
