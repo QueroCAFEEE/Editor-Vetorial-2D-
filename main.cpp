@@ -222,6 +222,9 @@ static void key(unsigned char key, int x, int y)
     case 'i':
         imprime_info_desenhos(listaPolig);
         break;
+     case 'p':
+        rotacao_desenho(atual, 1);
+        break;
 
     }
 
