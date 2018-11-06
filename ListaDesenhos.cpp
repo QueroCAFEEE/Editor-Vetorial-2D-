@@ -463,10 +463,12 @@ point ponto_medio(Desenho* poligono) //encontra o ponto médio do envelope do po
         printf("Ponto médio do Envelope:\nX:%d\nY:%d\n",bar.x,bar.y);
     */
 }
-void rotacao_desenho(Desenho* pol, float angulo){
-   float s = sin(angulo);
+
+void rotacao_desenho(Desenho* pol, float angulo){ //realiza a rotação do polígono ao redor do ponto médio por um ângulo
+   //s e c recebem os valores de seno e cosseno do ângulo escolhido para realizar a rotação
+   float s = sin(angulo); 
    float c = cos(angulo);
-   point bar = ponto_medio(pol);;
+   point pm = ponto_medio(pol); //pm recebe o ponto médio do polígono selecionado
 
    int difX;
    int difY;
@@ -476,16 +478,24 @@ void rotacao_desenho(Desenho* pol, float angulo){
         Vertice* tmp_vert = pol->vertices;
 
         while(tmp_vert != NULL)
-        {
-            difX = (tmp_vert->x - bar.x);
-            difY = (tmp_vert ->y - bar.y);
-
+        {   
+            /*Já que a rotação será feita ao redor do ponto médio e não ao redor da origem, é necessário o cálculo da diferença entre 
+            os valores atuais de (x,y) e os valores (x,y) do ponto médio: */
+            difX = (tmp_vert->x - pm.x);
+            difY = (tmp_vert ->y - pm.y);
+            
+            /*Os novos valores de (x,y) agora podem ser calculados seguindo a fórmula padrão de rotação 2D:
+                x’ = x . cos (q) – y . sen (q)
+                y’ = x . sen (q) + y . cos (q)
+            */
             float newX = ((difX * c) - (difY * s)) ;
             float newY = ((difX * s) + (difY * c));
-
-            tmp_vert->x = newX + bar.x;
-            tmp_vert->y = newY + bar.y;
-            tmp_vert = tmp_vert->prox;
+            
+            //Por fim, as diferenças calculadas anteriormente são acrescentadas novamente aos pontos:
+            tmp_vert->x = newX + pm.x;
+            tmp_vert->y = newY + pm.y;
+            
+            tmp_vert = tmp_vert->prox; //segue para o próximo vértice
         }
 
     }
