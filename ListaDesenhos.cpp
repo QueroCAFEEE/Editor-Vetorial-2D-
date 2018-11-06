@@ -406,26 +406,28 @@ double distancia_entre_2pt(int x1,int x2,int y1,int y2)
     return sqrt(pow(x2-x1,2)+pow(y2-y1,2));
 }
 
-point baricentro(Desenho* poligono)
+point ponto_medio(Desenho* poligono) //encontra o ponto médio do envelope do polígono selecionado
 {
-    int minX,minY,maxX,maxY;
-    point retorno;
-    int flg_first = 1;
+    int minX, minY, maxX, maxY; //variáveis para armazenar os pontos máximos e mínimos do polígono
+    point retorno; //ponto médio a ser retornado
+    int flg_first = 1; //variável para identificar a primeira iteração
+    
     if(poligono->vertices)
     {
-        Vertice* tmp_vertice = poligono->vertices;
-        while(tmp_vertice)
+        Vertice* tmp_vertice = poligono->vertices; 
+        
+        while(tmp_vertice) //enquanto houverem vértices para serem visitados:
         {
-            if(flg_first)
-            {
+            if(flg_first) //1ª iteração: valores de máximos de mínimos recebem os valores (x,y) do primeiro vértice percorrido
+            {   
                 minX = tmp_vertice->x;
                 minY = tmp_vertice->y;
                 maxX = tmp_vertice->x;
                 maxY = tmp_vertice->y;
-                flg_first = 0;
+                flg_first = 0; //fim da primeira iteração
             }
             else
-            {
+            {   // atualização dos valores máximos e mínimos
                 if(tmp_vertice->x < minX)
                 {
                     minX = tmp_vertice->x;
@@ -443,24 +445,30 @@ point baricentro(Desenho* poligono)
                     maxY = tmp_vertice->y;
                 }
             }
-            tmp_vertice = tmp_vertice->prox;
+            tmp_vertice = tmp_vertice->prox; //segue para o próximo vértice do polígono 
         }
-        retorno.x = minX + ((maxX - minX)/2);
-        retorno.y = minY + ((maxY - minY)/2);
-        return retorno;
+        /*Fim do while: as variáveis agora possuem os valores máximos e mínimos do polígono*/
+        
+        //Calculo do ponto médio: dados os pontos máximos e mínimos do envelope, temos que o valor do seu ponto médio é:
+        retorno.x = minX + ((maxX - minX)/2); //calculo do ponto médio x do envelope
+        retorno.y = minY + ((maxY - minY)/2); //calculo do ponto médio y do envelope
+        return retorno; //retorna o ponto médio (x,y) encontrado
+
     }else{
         printf("Erro: Poligono não possuí vertices.\n");
     }
     /*
     Exemplo para utilizar a função:
-        point bar = baricentro(atual);
-        printf("Baricentro do Envelope:\nX:%d\nY:%d\n",bar.x,bar.y);
+        point bar = ponto_medio(atual);
+        printf("Ponto médio do Envelope:\nX:%d\nY:%d\n",bar.x,bar.y);
     */
 }
-void rotacao_desenho(Desenho* pol, float angulo){
-   float s = sin(angulo);
+
+void rotacao_desenho(Desenho* pol, float angulo){ //realiza a rotação do polígono ao redor do ponto médio por um ângulo
+   //s e c recebem os valores de seno e cosseno do ângulo escolhido para realizar a rotação
+   float s = sin(angulo); 
    float c = cos(angulo);
-   point bar = baricentro(pol);;
+   point pm = ponto_medio(pol); //pm recebe o ponto médio do polígono selecionado
 
    int difX;
    int difY;
@@ -470,16 +478,24 @@ void rotacao_desenho(Desenho* pol, float angulo){
         Vertice* tmp_vert = pol->vertices;
 
         while(tmp_vert != NULL)
-        {
-            difX = (tmp_vert->x - bar.x);
-            difY = (tmp_vert ->y - bar.y);
-
+        {   
+            /*Já que a rotação será feita ao redor do ponto médio e não ao redor da origem, é necessário o cálculo da diferença entre 
+            os valores atuais de (x,y) e os valores (x,y) do ponto médio: */
+            difX = (tmp_vert->x - pm.x);
+            difY = (tmp_vert ->y - pm.y);
+            
+            /*Os novos valores de (x,y) agora podem ser calculados seguindo a fórmula padrão de rotação 2D:
+                x’ = x . cos (q) – y . sen (q)
+                y’ = x . sen (q) + y . cos (q)
+            */
             float newX = ((difX * c) - (difY * s)) ;
             float newY = ((difX * s) + (difY * c));
-
-            tmp_vert->x = newX + bar.x;
-            tmp_vert->y = newY + bar.y;
-            tmp_vert = tmp_vert->prox;
+            
+            //Por fim, as diferenças calculadas anteriormente são acrescentadas novamente aos pontos:
+            tmp_vert->x = newX + pm.x;
+            tmp_vert->y = newY + pm.y;
+            
+            tmp_vert = tmp_vert->prox; //segue para o próximo vértice
         }
 
     }
