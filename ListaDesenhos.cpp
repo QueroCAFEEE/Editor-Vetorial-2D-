@@ -222,16 +222,24 @@ void apaga_desenho(ListaD* lista,Desenho* pol)
     free(pol);
 }
 
-void escala_desenho(Desenho* pol, double escala)
+void escala_desenho(Desenho* pol, double escala) //realiza o escalonamento do polígono
 {
+    point pm = ponto_medio(pol); //pm: ponto médio do envelope do polígono
+
     if(pol->vertices)
     {
         Vertice* tmp_vert = pol->vertices;
+        Vertice* new_vert = pol->vertices; //novos valores de vértices após o escalonamento
 
         while(tmp_vert != NULL)
         {
-            tmp_vert->x *= escala;
-            tmp_vert->y *= escala;
+            /*calculo padrão para a realização do escalonamento: 
+              ( (ponto atual - ponto médio) * fator de escala ) + ponto médio
+            */
+            new_vert->x = ((tmp_vert->x - pm.x)*escala) + pm.x;
+            new_vert->y = ((tmp_vert->y - pm.y)*escala) + pm.y;
+            
+            new_vert = tmp_vert->prox;
             tmp_vert = tmp_vert->prox;
         }
     }
