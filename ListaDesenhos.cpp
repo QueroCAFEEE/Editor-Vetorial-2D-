@@ -78,7 +78,7 @@ void imprime_info_desenhos(ListaD* lista)
 
 void adiciona_vertice_desenho(Desenho* pol,Vertice* ve)
 {
-    if(!pol->vertices) //Logo n�o contem nenhum vertice.
+    if(!pol->vertices) //Logo não contem nenhum vertice.
     {
         pol->vertices = ve;
         ve->ant = NULL;
@@ -233,6 +233,51 @@ void escala_desenho(Desenho* pol, double escala)
             tmp_vert->x *= escala;
             tmp_vert->y *= escala;
             tmp_vert = tmp_vert->prox;
+        }
+    }
+}
+
+void espelhamento(Desenho* pol) // realiza o espelhamento do poligono selecionado
+{
+    int maxX; //variável para armazenar o ponto X mais a direita
+    int flg_first = 1; //variável para identificar a primeira iteração
+
+    Vertice* tmp_vertice = pol->vertices; //tmp_vertice recebe os vértices do polígono recebido pela função
+
+    while(tmp_vertice) //enquanto existirem vértices a serem visitados:
+    {
+        if(flg_first) //1ª iteração:
+        {
+            maxX = tmp_vertice->x; //maxX recebe o valor de x do primeiro vértice percorrido
+            flg_first = 0; //fim da primeira iteração
+        }
+        else
+        {
+            if(tmp_vertice->x > maxX) //caso o valor de x do vértice atual seja maior do que o valor armazenado anteriormente em maxX:
+            {                           
+                maxX = tmp_vertice->x; //maxX recebe o valor x do vértice atual
+            }
+        }
+        tmp_vertice = tmp_vertice->prox; //passa-se para o próximo vértice do polígono
+    }
+    /*Fim do while: a variável maxX agora possui o valor do 'x' mais a direita do polígono (o maior valor que x assume 
+    entre todos os vértices que compõem o polígono)*/
+
+    if(pol->vertices)
+    {
+        Vertice* new_vert = pol->vertices; //new_vert diz respeito aos novos vértices que iram compor o polígono espelhado
+        Vertice* tmp_vert = pol->vertices; 
+
+        while(new_vert != NULL) //enquanto o polígono ainda possuir vértices para serem atualizados
+        {
+            /*
+            O espelhamento em relação ao eixo x: dado cada valor de x de cada vértice do polígono, o novo valor de x é dado por
+            (Valor do maxX) + (Valor do maxX - Valor do x do vértice atual). Como o espelhamento está sendo feito em relação ao eixo x, 
+            o valor de y continua o mesmo.
+            */
+            new_vert->x = maxX + ( maxX - ( tmp_vert->x ) ); //valor de x atualizado de acordo com a fórmula
+            new_vert = tmp_vert->prox; //segue para atualização do próximo vértice do polígono
+            tmp_vert = tmp_vert->prox; //segue para o próximo vértice do polígono
         }
     }
 }
@@ -404,11 +449,38 @@ point baricentro(Desenho* poligono)
         retorno.y = minY + ((maxY - minY)/2);
         return retorno;
     }else{
-        printf("Erro: Poligono n�o possu� vertices.\n");
+        printf("Erro: Poligono não possuí vertices.\n");
     }
     /*
-    Exemplo para utilizar a fun��o:
+    Exemplo para utilizar a função:
         point bar = baricentro(atual);
         printf("Baricentro do Envelope:\nX:%d\nY:%d\n",bar.x,bar.y);
     */
+}
+void rotacao_desenho(Desenho* pol, float angulo){
+   float s = sin(angulo);
+   float c = cos(angulo);
+   point bar = baricentro(pol);;
+
+   int difX;
+   int difY;
+
+    if(pol->vertices)
+    {
+        Vertice* tmp_vert = pol->vertices;
+
+        while(tmp_vert != NULL)
+        {
+            difX = (tmp_vert->x - bar.x);
+            difY = (tmp_vert ->y - bar.y);
+
+            float newX = ((difX * c) - (difY * s)) ;
+            float newY = ((difX * s) + (difY * c));
+
+            tmp_vert->x = newX + bar.x;
+            tmp_vert->y = newY + bar.y;
+            tmp_vert = tmp_vert->prox;
+        }
+
+    }
 }
