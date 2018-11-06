@@ -78,13 +78,13 @@ ListaD* carrega_arquivo(char* nome);
 
 double distancia_entre_2pt(int x1,int x2,int y1,int y2);
 
-point baricentro(Desenho* poligono);
+point ponto_medio(Desenho* poligono);
 
 void rotacao_desenho(Desenho* pol, float angulo);
-/*função para rotacionar o polígono em torno dele mesmo, utilizando o baricentro do envelope
+/*função para rotacionar o polígono em torno dele mesmo, utilizando o ponto médio do envelope
 é utilizada a forma matemática para rotacionar todos os pontos do poligono, por isso a função 
 recebe como parâmetros o desenho e o angulo pelo qual deseja-se rotacionar o desenho. Foi seguida esta estrutura:
 xu := (xo-xr) * cos (ang) - (yo-yr) * sin (ang) + xr
 yu := (yo-yr) * cos (ang) + (xo-xr) * sin (ang) + yr
 em que xu e yu eram novos vértices já rotacionados, xo e yo os vértices do polígono desenhado 
-e xr e yr os vértices do baricentro*/
+e xr e yr os vértices do ponto médio*/
