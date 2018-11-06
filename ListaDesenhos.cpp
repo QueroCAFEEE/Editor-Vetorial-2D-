@@ -237,48 +237,48 @@ void escala_desenho(Desenho* pol, double escala)
     }
 }
 
-void espelhamento(Desenho* pol)
+void espelhamento(Desenho* pol) // realiza o espelhamento do poligono selecionado
 {
-    int maxX;
-    int flg_first = 1;
+    int maxX; //variável para armazenar o ponto X mais a direita
+    int flg_first = 1; //variável para identificar a primeira iteração
 
-    Vertice* tmp_vertice = pol->vertices;
+    Vertice* tmp_vertice = pol->vertices; //tmp_vertice recebe os vértices do polígono recebido pela função
 
-    while(tmp_vertice)
+    while(tmp_vertice) //enquanto existirem vértices a serem visitados:
     {
-        if(flg_first)
+        if(flg_first) //1ª iteração:
         {
-            maxX = tmp_vertice->x;
-            flg_first = 0;
+            maxX = tmp_vertice->x; //maxX recebe o valor de x do primeiro vértice percorrido
+            flg_first = 0; //fim da primeira iteração
         }
         else
         {
-            if(tmp_vertice->x > maxX)
-            {
-                maxX = tmp_vertice->x;
+            if(tmp_vertice->x > maxX) //caso o valor de x do vértice atual seja maior do que o valor armazenado anteriormente em maxX:
+            {                           
+                maxX = tmp_vertice->x; //maxX recebe o valor x do vértice atual
             }
         }
-        tmp_vertice = tmp_vertice->prox;
+        tmp_vertice = tmp_vertice->prox; //passa-se para o próximo vértice do polígono
     }
+    /*Fim do while: a variável maxX agora possui o valor do 'x' mais a direita do polígono (o maior valor que x assume 
+    entre todos os vértices que compõem o polígono)*/
 
     if(pol->vertices)
     {
-        int i = 0;
-        Vertice* new_vert = pol->vertices;
-        Vertice* tmp_vert = pol->vertices;
+        Vertice* new_vert = pol->vertices; //new_vert diz respeito aos novos vértices que iram compor o polígono espelhado
+        Vertice* tmp_vert = pol->vertices; 
 
-        while(new_vert != NULL)
+        while(new_vert != NULL) //enquanto o polígono ainda possuir vértices para serem atualizados
         {
-            new_vert->x = maxX+(maxX - (tmp_vert->x));
-            new_vert->y = tmp_vert->y;
-            //printf("x[%d]': %d\n", i, new_vert->x);
-            //printf("y[%d]': %d\n", i, new_vert->y);
-            //printf("\n");
-            new_vert = tmp_vert->prox;
-            tmp_vert = tmp_vert->prox;
-            i++;
+            /*
+            O espelhamento em relação ao eixo x: dado cada valor de x de cada vértice do polígono, o novo valor de x é dado por
+            (Valor do maxX) + (Valor do maxX - Valor do x do vértice atual). Como o espelhamento está sendo feito em relação ao eixo x, 
+            o valor de y continua o mesmo.
+            */
+            new_vert->x = maxX + ( maxX - ( tmp_vert->x ) ); //valor de x atualizado de acordo com a fórmula
+            new_vert = tmp_vert->prox; //segue para atualização do próximo vértice do polígono
+            tmp_vert = tmp_vert->prox; //segue para o próximo vértice do polígono
         }
-        //printf("---------------------\n");
     }
 }
 
