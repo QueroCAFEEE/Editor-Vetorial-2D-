@@ -12,47 +12,56 @@ using namespace std;
 #endif
 
 #include <stdlib.h>
-int numLines;
 
+ListaD* listaPolig = (ListaD*)malloc(sizeof(ListaD)); 	//Cria e aloca memória a variável que armazenará o endereço para o primeiro polinogono na estrutura de Desenhos
+Desenho* atual; 										//Variável para definir o poligono que está selecionado ou sendo desenhado.
 
-// INI MOD
-ListaD* listaPolig = (ListaD*)malloc(sizeof(ListaD));
-Desenho* atual;
-
+/*
+	<op>:
+	Cria e inicializa a variável que controla os estados do editor, sendo esses estados:
+		D : desenhando.
+		X : Modo livre.
+*/
 char op = 'D';
+int primeiro_vertice = 1;	//Flag para indicar quando o primeiro vértice é o proximo a ser desenhado.
+int movendo = 0;			//Flag para indicar que está na opção de mover o polígono.
+point rastro[2]; 			//Armazena os pontos para desenhar o rastro do mouse.
+point drag[2];				//Armazena a variação do mouse quando move o desenho.
+int gHeight;				//Utilizado para converter as coordenadas quando desenhar para o desenho não sair invertido.
+float gColor[3]= {0,1,0};	//Variável temporária para definição de cores. Inicializada como verde.
 
-int primeiro_vertice = 1;
-
-int movendo = 0;
-
-// END MOD
-
-point rastro[2];
-point drag[2];
-
-int gHeight;
-float gColor[3]= {0,1,0};
-
+/*
+	<contorno_selecionado>:
+	Desenha um contorno branco no poligono selecionado.
+*/
 void contorno_selecionado()
 {
-    if(atual->qtdVertices > 1)
+    if(atual->qtdVertices > 1)								//Verifica se o poligono atual tem mais de um vértice.
     {
-        Vertice* tmp_vert = atual->vertices;
-        glColor3f(1.0,1.0,1.0);
-        glBegin(GL_LINE_LOOP);
-        while(tmp_vert != NULL)
+        Vertice* tmp_vert = atual->vertices;				//Armazena em uma variável temporária o primeiro endereço dos vértices para poder percorrer todos.
+        glColor3f(1.0,1.0,1.0);								//Cor: Branco.
+        glBegin(GL_LINE_LOOP);								//Função de desenho do GLUT. GL_LINE_LOOP: Desenhará uma linha, e no último vértice ele desenhará automaticamente uma linha para o primeiro vértice.
+        while(tmp_vert != NULL)								//Percorrer os vértices enquanto houver.
         {
-            glVertex2i(tmp_vert->x,gHeight-tmp_vert->y);
-            tmp_vert = tmp_vert->prox;
+            glVertex2i(tmp_vert->x,gHeight-tmp_vert->y);	//Adiciona na função de desenho do GLUT o vértice.
+            tmp_vert = tmp_vert->prox;						//Vai para o próximo vertice.
         }
-        glEnd();
+        glEnd();											//Sinaliza o fim dos vértices do desenho GLUT.
     }
 }
 
+/*
+	<drawlines>:
+	Varre a lista de desenhos, enviando para o GLUT seus respectivos vértices.
+	Desenha o rastro.
+	Indica a cor inicial do poligono a ser desenhado;
+*/
 void drawlines()
 {
 
-    glColor3fv(gColor);
+    glColor3fv(gColor); //Indica que a cor, temporária é a cor a ser utilizada para o próximo desenho a ser criado.
+	
+	//Adiciona a cor atual a estrutura do poligono.
     if(atual)
     {
         atual->corPolig.r = gColor[0];
@@ -61,8 +70,8 @@ void drawlines()
         atual->corPolig.t = 1;
     }
 
-
-    if(op=='D' && primeiro_vertice == 0)
+	//Caso o usuário esteja desenhando, e o próximo vértice não é o primeiro, então ele desenhará o rastro
+    if(op=='D' && primeiro_vertice == 0)				
     {
         glBegin(GL_LINES);
         glVertex2i(rastro[0].x, gHeight-rastro[0].y);
@@ -70,7 +79,7 @@ void drawlines()
         glEnd();
     }
 
-
+	//Se existe um desenho na lista ele irá percorrer todos os desenhos e vértices desenhando na tela.
     if(listaPolig->head)
     {
         Desenho* tmp_des = listaPolig->head;
@@ -80,12 +89,15 @@ void drawlines()
 
             if(tmp_vert)
             {
-                glColor3d(tmp_des->corPolig.r,tmp_des->corPolig.g,tmp_des->corPolig.b);
-                glBegin(GL_LINES);
+                glColor3d(tmp_des->corPolig.r,tmp_des->corPolig.g,tmp_des->corPolig.b); 	//Define que a cor do poligono é a da estrutura.
+                glBegin(GL_LINES);  //Inicia o desenho
                 while(tmp_vert!=NULL)
                 {
 
-                    glVertex2i(tmp_vert->x, gHeight-tmp_vert->y);
+                    glVertex2i(tmp_vert->x, gHeight-tmp_vert->y); //Adiciona vértice origem no GLUT
+					
+					//Caso exista um próximo vértice, ele adiciona ao GLUT o vértice destino, desenhando assim uma linha.
+					//Caso não exista, o vértice destino será o primeiro vértice do desenho, fechando assim o polígono.
                     if(tmp_vert->prox != NULL)
                     {
                         glVertex2i(tmp_vert->prox->x, gHeight-tmp_vert->prox->y);
@@ -106,39 +118,51 @@ void drawlines()
 
 }
 
+/*
+	<display>:
+	O GLUT chamará essa função diversas vezes para redesenhar os polígonos na tela.
+*/
 void display()
 {
+	/*
+		<glClear>:
+		Serve para limpar buffers utilizados pelo OpenGL com valores pré-definidos. A máscara utilizada neste exemplo, (GL_COLOR_BUFFER_BIT, diz à função glClear() que apenas o buffer de desenho deve ser limpo. Após a execução desta função, a tela ficará preta, uma vez que a init() define (R, G, B)=(0.0, 0.0, 0.0) como cor de limpeza de tela. 
+	*/
     glClear(GL_COLOR_BUFFER_BIT);
     drawlines();
-    //glutSwapBuffers();
+	
+	//Se existir um desenho selecionado, e a opção estiver no modo livre chama a função
     if(atual != NULL && op == 'X')
     {
         contorno_selecionado();
     }
-    glFlush();
+    glFlush();	//Faz com que qualquer comando OpenGL ainda não executado seja executado o mais rápido possível pelo mecanismo de exibição.
 }
-
+/*
+	<menufunc>:
+	Define os comandos a serem executados pelo menu do botão direito do mouse dependendo da opção selecionada;
+*/
 void menufunc(int val)
 {
     switch (val)
     {
-    case 0:
+    case 0: //Opção: Cores->Red
         gColor[0]=1;
         gColor[1]=0;
         gColor[2]=0;
         break;
-    case 1:
+    case 1: //Opção: Cores->Green
         gColor[0]=0;
         gColor[1]=1;
         gColor[2]=0;
         break;
-    case 2:
+    case 2: //Opção: Cores->Blue
         gColor[0]=0;
         gColor[1]=0;
         gColor[2]=1;
         break;
 
-    case 3:
+    case 3: //Opção: Cores->Outra cor.
         printf("Informe a nova cor [Ponto Flutuante]:\nVermelho:");
         scanf(" %f",&gColor[0]);
         printf("Verde:");
@@ -262,11 +286,11 @@ void createMenu()
 */
 void init()
 {
-    glClearColor(0,0,0,1);
-    glMatrixMode(GL_PROJECTION);
-    glOrtho(-1, 1.0, -1, 1.0, -1.0, 1.0);
-    glMatrixMode(GL_MODELVIEW);
-    createMenu();
+    glClearColor(0,0,0,1);					//Define a cor de fundo da janela de visualização como preta
+    glMatrixMode(GL_PROJECTION);			//Define que as funções usadas a após a chamada desta rotina irão referir-se ao observador e não aos objetos do cenário 3D.
+    glOrtho(-1, 1.0, -1, 1.0, -1.0, 1.0);  	//Define a janela de seleção onde se deseja trabalhar. Os parâmetros são os seguintes glOrtho(Xmin, Xmax, Ymin, Ymax, Zmin, Zmax).
+    glMatrixMode(GL_MODELVIEW); 			//Define que as funções usadas a após a chamada desta rotina irão referir-se ao aos objetos do cenário 3D e não ao observador.
+    createMenu(); 							//Chama função que cria o menu do botão direito do mouse.
 }
 
 void reshape(int width, int height)
@@ -450,7 +474,16 @@ int main(int argc, char ** argv)
     */
     glutPassiveMotionFunc(mousedrag);
 
+	/*
+		<init>:
+		Inicia alguns componentes básicos para utilização do editor.
+	*/
     init();
+	
+	/*
+		<glutMainLoop>:
+		Inicia o loop de processamento de desenhos com GLUT. Esta rotina deve ser chamada pelo menos uma vez em um programa que utilize a biblioteca GLUT.
+	*/
     glutMainLoop();
 
     return 0;
