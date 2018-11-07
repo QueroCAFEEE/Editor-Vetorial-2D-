@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "ListaDesenhos.h"
 #include <math.h>
-
+#define PI 3.14159265359
 using namespace std;
 
 #ifdef __APPLE__
@@ -13,22 +13,47 @@ using namespace std;
 
 #include <stdlib.h>
 
-ListaD* listaPolig = (ListaD*)malloc(sizeof(ListaD)); 	//Cria e aloca mem√≥ria a vari√°vel que armazenar√° o endere√ßo para o primeiro polinogono na estrutura de Desenhos
-Desenho* atual; 										//Vari√°vel para definir o poligono que est√° selecionado ou sendo desenhado.
+ListaD* listaPolig = (ListaD*)malloc(sizeof(ListaD)); 	//Cria e aloca memÛria a vari·vel que armazenar· o endereÁo para o primeiro polinogono na estrutura de Desenhos
+Desenho* atual; 										//Vari·vel para definir o poligono que est· selecionado ou sendo desenhado.
 
 /*
 	<op>:
-	Cria e inicializa a vari√°vel que controla os estados do editor, sendo esses estados:
+	Cria e inicializa a vari·vel que controla os estados do editor, sendo esses estados:
 		D : desenhando.
 		X : Modo livre.
 */
 char op = 'D';
-int primeiro_vertice = 1;	//Flag para indicar quando o primeiro v√©rtice √© o proximo a ser desenhado.
-int movendo = 0;			//Flag para indicar que est√° na op√ß√£o de mover o pol√≠gono.
+int primeiro_vertice = 1;	//Flag para indicar quando o primeiro vÈrtice È o proximo a ser desenhado.
+int movendo = 0;			//Flag para indicar que est· na opÁ„o de mover o polÌgono.
 point rastro[2]; 			//Armazena os pontos para desenhar o rastro do mouse.
-point drag[2];				//Armazena a varia√ß√£o do mouse quando move o desenho.
-int gHeight;				//Utilizado para converter as coordenadas quando desenhar para o desenho n√£o sair invertido.
-float gColor[3]= {0,1,0};	//Vari√°vel tempor√°ria para defini√ß√£o de cores. Inicializada como verde.
+point drag[2];				//Armazena a variaÁ„o do mouse quando move o desenho.
+int gHeight;				//Utilizado para converter as coordenadas quando desenhar para n„o sair invertido.
+float gColor[3]= {0,1,0};	//Vari·vel tempor·ria para definiÁ„o de cores. Inicializada como verde.
+
+void info()
+{
+    MessageBox(0,
+
+               "Para mover o poligono basta apertar o bot„o direito do mouse basta "
+               "selecionar 'Editar' e 'mover'o poligono grudara no cursor, \n\n"
+               "Para solta-lo basta clicar em qualquer parte da janela de desenho \n\n"
+               "Para mudar a cor do poligono, basta termina-lo e clicar com botao direito em cima"
+               "e escolher a opcao 'Cores' e clicar na desejada \n\n"
+               "Para salvar o poligono desenhado basta clicar com botao direito do mouse em cima do desenho "
+               "e escolher a opcao 'Arquivo' e selecionar a opcao 'Salvar'\n\n"
+               "Ja para carregar algum poligono ja salvo em qualquer parte da janela de desenho "
+               "basta clicar com botao direito na janela de desenho, selecionar a opcao 'Arquivo' e selecionar a opcao 'Carregar' \n\n"
+               "Para apagar um poligono basta clicar em cima do desenho com o botao direito do mouse "
+               "e selecionar a opcao 'Editar' e selecionar a opcao 'Apagar', e o desenho sera totalmente apagado\n\n"
+               "Para sair do editor basta clicar com botao direito do mouse em qualquer parte da tela e selecionar a opcao 'Sair' \n\n"
+               "Para aumentar o poligono de tamanho basta apertar o '+' do teclado\n\n"
+               "Ja para diminuir o poligono, basta apertar a tecla '-' do teclado\n\n"
+               "Para desenhar seu poligono basta seguir com o cursor ate onde queira uma linha de seu poligono"
+               "logo depois apertar o botao esquerdo do mouse, para que grave aquela aresta"
+               "e assim sucessivamente ate fechar o poligono e o desenho mudar a cor de verde para branco"
+
+               , "Ajuda", MB_OK );
+}
 
 /*
 	<contorno_selecionado>:
@@ -36,32 +61,32 @@ float gColor[3]= {0,1,0};	//Vari√°vel tempor√°ria para defini√ß√£o de cores. Ini
 */
 void contorno_selecionado()
 {
-    if(atual->qtdVertices > 1)								//Verifica se o poligono atual tem mais de um v√©rtice.
+    if(atual->qtdVertices > 1)								//Verifica se o poligono atual tem mais de um vÈrtice.
     {
-        Vertice* tmp_vert = atual->vertices;				//Armazena em uma vari√°vel tempor√°ria o primeiro endere√ßo dos v√©rtices para poder percorrer todos.
+        Vertice* tmp_vert = atual->vertices;				//Armazena em uma vari·vel tempor·ria o primeiro endereÁo dos vÈrtices para poder percorrer todos.
         glColor3f(1.0,1.0,1.0);								//Cor: Branco.
-        glBegin(GL_LINE_LOOP);								//Fun√ß√£o de desenho do GLUT. GL_LINE_LOOP: Desenhar√° uma linha, e no √∫ltimo v√©rtice ele desenhar√° automaticamente uma linha para o primeiro v√©rtice.
-        while(tmp_vert != NULL)								//Percorrer os v√©rtices enquanto houver.
+        glBegin(GL_LINE_LOOP);								//FunÁ„o de desenho do GLUT. GL_LINE_LOOP: Desenhar· uma linha, e no ˙ltimo vÈrtice ele desenhar· automaticamente uma linha para o primeiro vÈrtice.
+        while(tmp_vert != NULL)								//Percorrer os vÈrtices enquanto houver.
         {
-            glVertex2i(tmp_vert->x,gHeight-tmp_vert->y);	//Adiciona na fun√ß√£o de desenho do GLUT o v√©rtice.
-            tmp_vert = tmp_vert->prox;						//Vai para o pr√≥ximo vertice.
+            glVertex2i(tmp_vert->x,gHeight-tmp_vert->y);	//Adiciona na funÁ„o de desenho do GLUT o vÈrtice.
+            tmp_vert = tmp_vert->prox;						//Vai para o prÛximo vertice.
         }
-        glEnd();											//Sinaliza o fim dos v√©rtices do desenho GLUT.
+        glEnd();											//Sinaliza o fim dos vÈrtices do desenho GLUT.
     }
 }
 
 /*
 	<drawlines>:
-	Varre a lista de desenhos, enviando para o GLUT seus respectivos v√©rtices.
+	Varre a lista de desenhos, enviando para o GLUT seus respectivos vÈrtices.
 	Desenha o rastro.
 	Indica a cor inicial do poligono a ser desenhado;
 */
 void drawlines()
 {
 
-    glColor3fv(gColor); //Indica que a cor, tempor√°ria √© a cor a ser utilizada para o pr√≥ximo desenho a ser criado.
-	
-	//Adiciona a cor atual a estrutura do poligono.
+    glColor3fv(gColor); //Indica que a cor, tempor·ria È a cor a ser utilizada para o prÛximo desenho a ser criado.
+
+    //Adiciona a cor atual a estrutura do poligono.
     if(atual)
     {
         atual->corPolig.r = gColor[0];
@@ -70,8 +95,8 @@ void drawlines()
         atual->corPolig.t = 1;
     }
 
-	//Caso o usu√°rio esteja desenhando, e o pr√≥ximo v√©rtice n√£o √© o primeiro, ent√£o ele desenhar√° o rastro
-    if(op=='D' && primeiro_vertice == 0)				
+    //Caso o usu·rio esteja desenhando, e o prÛximo vÈrtice n„o È o primeiro, ent„o ele desenhar· o rastro
+    if(op=='D' && primeiro_vertice == 0)
     {
         glBegin(GL_LINES);
         glVertex2i(rastro[0].x, gHeight-rastro[0].y);
@@ -79,7 +104,7 @@ void drawlines()
         glEnd();
     }
 
-	//Se existe um desenho na lista ele ir√° percorrer todos os desenhos e v√©rtices desenhando na tela.
+    //Se existe um desenho na lista ele ir· percorrer todos os desenhos e vÈrtices desenhando na tela.
     if(listaPolig->head)
     {
         Desenho* tmp_des = listaPolig->head;
@@ -89,15 +114,15 @@ void drawlines()
 
             if(tmp_vert)
             {
-                glColor3d(tmp_des->corPolig.r,tmp_des->corPolig.g,tmp_des->corPolig.b); 	//Define que a cor do poligono √© a da estrutura.
+                glColor3d(tmp_des->corPolig.r,tmp_des->corPolig.g,tmp_des->corPolig.b); 	//Define que a cor do poligono È a da estrutura.
                 glBegin(GL_LINES);  //Inicia o desenho
                 while(tmp_vert!=NULL)
                 {
 
-                    glVertex2i(tmp_vert->x, gHeight-tmp_vert->y); //Adiciona v√©rtice origem no GLUT
-					
-					//Caso exista um pr√≥ximo v√©rtice, ele adiciona ao GLUT o v√©rtice destino, desenhando assim uma linha.
-					//Caso n√£o exista, o v√©rtice destino ser√° o primeiro v√©rtice do desenho, fechando assim o pol√≠gono.
+                    glVertex2i(tmp_vert->x, gHeight-tmp_vert->y); //Adiciona vÈrtice origem no GLUT
+
+                    //Caso exista um prÛximo vÈrtice, ele adiciona ao GLUT o vÈrtice destino, desenhando assim uma linha.
+                    //Caso n„o exista, o vÈrtice destino ser· o primeiro vÈrtice do desenho, fechando assim o polÌgono.
                     if(tmp_vert->prox != NULL)
                     {
                         glVertex2i(tmp_vert->prox->x, gHeight-tmp_vert->prox->y);
@@ -120,49 +145,49 @@ void drawlines()
 
 /*
 	<display>:
-	O GLUT chamar√° essa fun√ß√£o diversas vezes para redesenhar os pol√≠gonos na tela.
+	O GLUT chamar· essa funÁ„o diversas vezes para redesenhar os polÌgonos na tela.
 */
 void display()
 {
-	/*
-		<glClear>:
-		Serve para limpar buffers utilizados pelo OpenGL com valores pr√©-definidos. A m√°scara utilizada neste exemplo, (GL_COLOR_BUFFER_BIT, diz √† fun√ß√£o glClear() que apenas o buffer de desenho deve ser limpo. Ap√≥s a execu√ß√£o desta fun√ß√£o, a tela ficar√° preta, uma vez que a init() define (R, G, B)=(0.0, 0.0, 0.0) como cor de limpeza de tela. 
-	*/
+    /*
+    	<glClear>:
+    	Serve para limpar buffers utilizados pelo OpenGL com valores prÈ-definidos. A m·scara utilizada neste exemplo, (GL_COLOR_BUFFER_BIT, diz ‡ funÁ„o glClear() que apenas o buffer de desenho deve ser limpo. ApÛs a execuÁ„o desta funÁ„o, a tela ficar· preta, uma vez que a init() define (R, G, B)=(0.0, 0.0, 0.0) como cor de limpeza de tela.
+    */
     glClear(GL_COLOR_BUFFER_BIT);
     drawlines();
-	
-	//Se existir um desenho selecionado, e a op√ß√£o estiver no modo livre chama a fun√ß√£o
+
+    //Se existir um desenho selecionado, e a opÁ„o estiver no modo livre chama a funÁ„o
     if(atual != NULL && op == 'X')
     {
         contorno_selecionado();
     }
-    glFlush();	//Faz com que qualquer comando OpenGL ainda n√£o executado seja executado o mais r√°pido poss√≠vel pelo mecanismo de exibi√ß√£o.
+    glFlush();	//Faz com que qualquer comando OpenGL ainda n„o executado seja executado o mais r·pido possÌvel pelo mecanismo de exibiÁ„o.
 }
 /*
 	<menufunc>:
-	Define os comandos a serem executados pelo menu do bot√£o direito do mouse dependendo da op√ß√£o selecionada;
+	Define os comandos a serem executados pelo menu do bot„o direito do mouse dependendo da opÁ„o selecionada;
 */
 void menufunc(int val)
 {
     switch (val)
     {
-    case 0: //Op√ß√£o: Cores->Red
+    case 0: //OpÁ„o: Cores->Red
         gColor[0]=1;
         gColor[1]=0;
         gColor[2]=0;
         break;
-    case 1: //Op√ß√£o: Cores->Green
+    case 1: //OpÁ„o: Cores->Green
         gColor[0]=0;
         gColor[1]=1;
         gColor[2]=0;
         break;
-    case 2: //Op√ß√£o: Cores->Blue
+    case 2: //OpÁ„o: Cores->Blue
         gColor[0]=0;
         gColor[1]=0;
         gColor[2]=1;
         break;
 
-    case 3: //Op√ß√£o: Cores->Outra cor.
+    case 3: //OpÁ„o: Cores->Outra cor.
         printf("Informe a nova cor [Ponto Flutuante]:\nVermelho:");
         scanf(" %f",&gColor[0]);
         printf("Verde:");
@@ -171,36 +196,84 @@ void menufunc(int val)
         scanf(" %f",&gColor[2]);
         break;
 
-    case 4:
+    case 4: //OpÁ„o: Editar->Mover
         movendo = 1;
         break;
 
-    case 5:
+    case 5: //OpÁ„o: Editar->Apagar
         if(atual != NULL)
         {
             apaga_desenho(listaPolig,atual);
-            glutPostRedisplay();
+            glutPostRedisplay();    //Chama a funÁ„o display novamente, fazendo com que a janela corrente seja redesenhada.
         }
         break;
 
-    case 6:
+    case 6: //OpÁ„o: Arquivo->Salvar
         salva_arquivo("test.txt",listaPolig);
         break;
 
-    case 7:
+    case 7: //OpÁ„o: Arquivo->Carregar
         listaPolig = carrega_arquivo("test.txt");
         break;
 
-    case 9:
+    case 8: //OpÁ„o: Editar->Rotacionar(+90∫)
+        if(atual != NULL)
+        {
+            rotacao_desenho(atual, PI/2);
+        }
+        break;
+
+    case 9: //OpÁ„o: Editar->Rotacionar(-90∫)
+        if(atual != NULL)
+        {
+            rotacao_desenho(atual, -PI/2);
+        }
+        break;
+
+    case 10: //OpÁ„o: Editar->Espelhar
+        if(atual != NULL)
+        {
+            espelhamento(atual);
+        }
+        break;
+
+    case 11: //OpÁ„o: Desenhar
+        atual=NULL;
+        op='D';
+        break;
+
+    case 12: //OpÁ„o: Editar-> Aumentar Escala
+        if(atual != NULL)
+        {
+            escala_desenho(atual,1.2);
+        }
+        break;
+
+    case 13: //OpÁ„o: Editar-> Diminuir Escala
+        if(atual != NULL)
+        {
+            escala_desenho(atual,0.8);
+        }
+        break;
+
+    case 98: //OpÁ„o: Sair
+        info();
+        break;
+
+    case 99: //OpÁ„o: Sair
         exit(0);
     }
 }
 
+/*
+    <key>:
+    Define o que fazer quando determinada tecla for pressionada.
+*/
 static void key(unsigned char key, int x, int y)
 {
     switch (key)
     {
-    case 27 :
+    case 27 : //Sair
     case 'q':
         exit(0);
         break;
@@ -222,49 +295,67 @@ static void key(unsigned char key, int x, int y)
         //redimensionar
         if(atual != NULL)
         {
-            escala_desenho(atual,1.02);
+            escala_desenho(atual,1.2);
         }
         break;
     case '-':
         //redimensionar
         if(atual != NULL)
         {
-            escala_desenho(atual,0.98);
+            escala_desenho(atual,0.8);
         }
         break;
-            
+
     case 'r':
-        espelhamento(atual);
-        break;            
-            
+        //espelhar
+        if(atual!=NULL)
+        {
+            espelhamento(atual);
+        }
+        break;
+
     case 'j':
+        //Salva os poligonos atuais em um arquivo
         salva_arquivo("test.txt",listaPolig);
         break;
     case 'k':
+        //Carrega os poligonos de um arquivo
         listaPolig = carrega_arquivo("test.txt");
         break;
     case 'i':
+        //Debuga as informaÁıes contidas nas estruturas dos poligonos
         imprime_info_desenhos(listaPolig);
         break;
-     case 'p':
-        rotacao_desenho(atual, 1);
+    case 'p':
+        if(atual != NULL)
+        {
+            rotacao_desenho(atual, PI/2);
+        }
         break;
 
     }
 
     glutPostRedisplay();
 }
-
+/*
+    <createMenu>:
+    FunÁ„o que define as opÁıes do menu do click direito.
+*/
 void createMenu()
 {
-    int menuCor = glutCreateMenu(menufunc);
-    glutAddMenuEntry("Red", 0);
+    int menuCor = glutCreateMenu(menufunc); //Define que a funÁ„o a ser chamada È a menufunc
+    glutAddMenuEntry("Red", 0); //Adiciona uma opÁ„o ao menu, com o primeiro par‚metro o nome que aparecer·, e o segundo o valor que passar· para a funÁ„o (menufunc)
     glutAddMenuEntry("Green", 1);
     glutAddMenuEntry("Blue", 2);
     glutAddMenuEntry("Outra cor.(Inserir via prompt)",3);
 
     int menuEditar = glutCreateMenu(menufunc);
     glutAddMenuEntry("Mover",4);
+    glutAddMenuEntry("Espelhar",10);
+    glutAddMenuEntry("Aumentar Escala",12);
+    glutAddMenuEntry("Diminuir Escala",13);
+    glutAddMenuEntry("Rotacionar(+90∫)",8);
+    glutAddMenuEntry("Rotacionar(-90∫)",9);
     glutAddMenuEntry("Apagar",5);
 
     int menuArquivo = glutCreateMenu(menufunc);
@@ -272,47 +363,52 @@ void createMenu()
     glutAddMenuEntry("Carregar",7);
 
     int menu=glutCreateMenu(menufunc);
-    glutAddSubMenu("Editar",menuEditar);
+    glutAddMenuEntry("Desenhar",11);
+    glutAddSubMenu("Editar",menuEditar);//adiciona submenu
     glutAddSubMenu("Cores",menuCor);
     glutAddSubMenu("Arquivo",menuArquivo);
-    glutAddMenuEntry("Sair",9);
+    glutAddMenuEntry("Ajuda",98);
+    glutAddMenuEntry("Sair",99);
 
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
+    glutAttachMenu(GLUT_RIGHT_BUTTON); //Define que o menu criado aparecer· ao click do bot„o direito.
 }
 
 /*
     <init>:
-    Inicializa alguns aspectos b√°sicos para o funcionamento da aplica√ß√£o.
+    Inicializa alguns aspectos b·sicos para o funcionamento da aplicaÁ„o.
 */
 void init()
 {
-    glClearColor(0,0,0,1);					//Define a cor de fundo da janela de visualiza√ß√£o como preta
-    glMatrixMode(GL_PROJECTION);			//Define que as fun√ß√µes usadas a ap√≥s a chamada desta rotina ir√£o referir-se ao observador e n√£o aos objetos do cen√°rio 3D.
-    glOrtho(-1, 1.0, -1, 1.0, -1.0, 1.0);  	//Define a janela de sele√ß√£o onde se deseja trabalhar. Os par√¢metros s√£o os seguintes glOrtho(Xmin, Xmax, Ymin, Ymax, Zmin, Zmax).
-    glMatrixMode(GL_MODELVIEW); 			//Define que as fun√ß√µes usadas a ap√≥s a chamada desta rotina ir√£o referir-se ao aos objetos do cen√°rio 3D e n√£o ao observador.
-    createMenu(); 							//Chama fun√ß√£o que cria o menu do bot√£o direito do mouse.
+    glClearColor(0,0,0,1);					//Define a cor de fundo da janela de visualizaÁ„o como preta
+    glMatrixMode(GL_PROJECTION);			//Define que as funÁıes usadas a apÛs a chamada desta rotina ir„o referir-se ao observador e n„o aos objetos do cen·rio 3D.
+    glOrtho(-1, 1.0, -1, 1.0, -1.0, 1.0);  	//Define a janela de seleÁ„o onde se deseja trabalhar. Os par‚metros s„o os seguintes glOrtho(Xmin, Xmax, Ymin, Ymax, Zmin, Zmax).
+    glMatrixMode(GL_MODELVIEW); 			//Define que as funÁıes usadas a apÛs a chamada desta rotina ir„o referir-se ao aos objetos do cen·rio 3D e n„o ao observador.
+    createMenu(); 							//Chama funÁ„o que cria o menu do bot„o direito do mouse.
+    info();
 }
 
 void reshape(int width, int height)
 {
-    gHeight=height;
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, width, 0,height);
-
-    glMatrixMode(GL_MODELVIEW);
+    gHeight=height;                         //Salva em uma vari·vel global a nova altura da janela.
+    glMatrixMode(GL_PROJECTION);            //Define que as funÁıes usadas a apÛs a chamada desta rotina ir„o referir-se ao observador e n„o aos objetos do cen·rio 3D.
+    glLoadIdentity();                       //inicia a matriz de projeÁ„o corrente como a matriz identidade
+    gluOrtho2D(0, width, 0,height);         //Define a janela de seleÁ„o onde se deseja trabalhar. Os par‚metros s„o os seguintes glOrtho(Xmin, Xmax, Ymin, Ymax, Zmin, Zmax).
+    glMatrixMode(GL_MODELVIEW);             //Define que as funÁıes usadas a apÛs a chamada desta rotina ir„o referir-se ao aos objetos do cen·rio 3D e n„o ao observador.
 }
 
-
+/*
+    <mouseclick>:
+    FunÁ„o que È chamada sempre que h· um clique no mouse dentro do programa.
+*/
 void mouseclick(int button, int state,int x, int y)
 {
-    if(button==GLUT_LEFT_BUTTON && state==GLUT_UP)
+    if(button==GLUT_LEFT_BUTTON && state==GLUT_UP) //Se o bot„o esquerdo for solto
     {
-        if(op == 'D')
+        if(op == 'D')//Verifica se est· no modo desenhar
         {
-            if(primeiro_vertice == 1)
+            if(primeiro_vertice == 1) //Se for primeiro vÈrtice
             {
-                Desenho* novo = inicia_desenho();
+                Desenho* novo = inicia_desenho();   //cria um novo desenho
                 Vertice* v = cria_vertice(x,y);
                 adiciona_vertice_desenho(novo,v);
                 adiciona_novo_desenho(listaPolig,novo);
@@ -321,7 +417,7 @@ void mouseclick(int button, int state,int x, int y)
             }
             else
             {
-                if(distancia_entre_2pt(atual->vertices->x,x,atual->vertices->y,y) < 5.0)
+                if(distancia_entre_2pt(atual->vertices->x,x,atual->vertices->y,y) < 5.0)//verifica se o usu·rio clicou proximo ao primeiro ponto para fechar o poligono.
                 {
                     op = 'X';
                     primeiro_vertice = 1;
@@ -332,18 +428,42 @@ void mouseclick(int button, int state,int x, int y)
                     adiciona_vertice_desenho(atual,v);
                 }
             }
+            //atualiza as posiÁıes do rastro
             rastro[0].x=x;
             rastro[0].y=y;
             rastro[1].x=x;
             rastro[1].y=y;
         }
     }
-    else if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    else if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)//Se o bot„o esquerdo for pressionado
     {
-        if(op == 'X')
+        if(op == 'X')//Verifica se est· no modo livre/selecionar
         {
-            atual = clica_desenho(listaPolig,x,y);
-            if(atual)
+            atual = clica_desenho(listaPolig,x,y);//busca se na ·rea clicada possui algum poligono.
+            if(atual) //caso ache um desenho, atualiza a cor tempor·ria com a cor do poligono.
+            {
+                gColor[0] = atual->corPolig.r;
+                gColor[1] = atual->corPolig.g;
+                gColor[2] = atual->corPolig.b;
+            }
+            //atualiza valores para mover
+            drag[0].x = x;
+            drag[0].y = y;
+
+            glutPostRedisplay();
+        }
+        if(movendo)//Caso esteja movendo e clicar com o bot„o esquerdo, solta o poligono.
+        {
+            movendo = 0;
+        }
+
+    }
+    else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)//Se o bot„o direito for pressionado
+    {
+        if(op == 'X')//Verifica se est· no modo livre/selecionar
+        {
+            atual = clica_desenho(listaPolig,x,y);//busca se na ·rea clicada possui algum poligono.
+            if(atual) //caso ache um desenho, atualiza a cor tempor·ria com a cor do poligono.
             {
                 gColor[0] = atual->corPolig.r;
                 gColor[1] = atual->corPolig.g;
@@ -351,36 +471,24 @@ void mouseclick(int button, int state,int x, int y)
             }
             drag[0].x = x;
             drag[0].y = y;
-            glutPostRedisplay();
-        }
-        if(movendo)
-        {
-            movendo = 0;
-        }
-
-    }
-    else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
-    {
-        if(op == 'X')
-        {
-            atual = clica_desenho(listaPolig,x,y);
-            gColor[0] = atual->corPolig.r;
-            gColor[1] = atual->corPolig.g;
-            gColor[2] = atual->corPolig.b;
         }
     }
     glutPostRedisplay();
 }
 
+/*
+    <mousedrag>:
+    FunÁ„o que È chamada quando o mouse se move.
+*/
 void mousedrag(int x, int y)
 {
 
-    if(!primeiro_vertice)
+    if(!primeiro_vertice)//Caso n„o seja o primeiro vÈrtice, atualiza as posiÁıes do rastro.
     {
         rastro[1].x=x;
         rastro[1].y=y;
     }
-    if(movendo)
+    if(movendo)//Calcula a variaÁ„o da posic„o do mouse para mover o desenho.
     {
         drag[1].x = x;
         drag[1].y = y;
@@ -396,25 +504,25 @@ void mousedrag(int x, int y)
 
 int main(int argc, char ** argv)
 {
-    //Inicializa√ß√µes
+    //InicializaÁıes
     listaPolig->head = NULL;
     atual = NULL;
 
     /*
         <glutInit>:
-        Inicializa a biblioteca GLUT e negocia a sess√£o junto com o sistema de janela.
-        Neste processo, glutInit pode provocar a finaliza√ß√£o da aplica√ß√£o GLUT, enviando
-        uma mensagem de erro ao usu√°rio indicando que n√£o pode ser inicializada apropriadamente.
+        Inicializa a biblioteca GLUT e negocia a sess„o junto com o sistema de janela.
+        Neste processo, glutInit pode provocar a finalizaÁ„o da aplicaÁ„o GLUT, enviando
+        uma mensagem de erro ao usu·rio indicando que n„o pode ser inicializada apropriadamente.
     */
     glutInit(&argc, argv);
 
     /*
         <glutInitDisplayMode>:
-        Avisa a GLUT que tipo de modo de exibi√ß√£o deve ser usado quando a janela √© criada.
-        Neste caso os argumentos indicam a cria√ß√£o de uma janela single-buffered (GLUT_SINGLE)
+        Avisa a GLUT que tipo de modo de exibiÁ„o deve ser usado quando a janela È criada.
+        Neste caso os argumentos indicam a criaÁ„o de uma janela single-buffered (GLUT_SINGLE)
         com o modo de cores RGBA (GLUT_RGB). O primeiro significa que todos os comandos de
-        desenho s√£o feitos na janela de exibi√ß√£o.O modo de cores RGBA significa que as cores
-        s√£o especificadas atrav√©s do fornecimento de intensidades dos componentes red, green
+        desenho s„o feitos na janela de exibiÁ„o.O modo de cores RGBA significa que as cores
+        s„o especificadas atravÈs do fornecimento de intensidades dos componentes red, green
         e blue separadas.
 
     */
@@ -422,7 +530,7 @@ int main(int argc, char ** argv)
 
     /*
         <glutInitWindowPosition>:
-        Define a posi√ß√£o inicial da janela.
+        Define a posiÁ„o inicial da janela.
     */
     glutInitWindowPosition(100,100);
 
@@ -434,56 +542,56 @@ int main(int argc, char ** argv)
 
     /*
         <glutCreateWindow>:
-        √© o comando da biblioteca GLUT que cria a janela. Neste caso, √© criada uma janela com o
-        nome "Editor 2D OpenGL/GLUT". Este argumento corresponde a legenda para a barra de t√≠tulo
+        È o comando da biblioteca GLUT que cria a janela. Neste caso, È criada uma janela com o
+        nome "Editor 2D OpenGL/GLUT". Este argumento corresponde a legenda para a barra de tÌtulo
         da janela.
     */
     glutCreateWindow("Editor 2D OpenGL/GLUT");
 
     /*
         <glutReshapeFunc>:
-        Define a fun√ß√£o que ser√° chamada quando a janela atual sofrer altera√ß√µes em suas dimens√µes.
-        Passa como argumento as novas dimens√µes para a fun√ß√£o.
+        Define a funÁ„o que ser· chamada quando a janela atual sofrer alteraÁıes em suas dimensıes.
+        Passa como argumento as novas dimensıes para a funÁ„o.
     */
     glutReshapeFunc(reshape);
 
     /*
         <glutDisplayFunc>:
-        Define a fun√ß√£o que ser√° chamada quando a janela atual necessita ser redesenhada/desenhada.
+        Define a funÁ„o que ser· chamada quando a janela atual necessita ser redesenhada/desenhada.
     */
     glutDisplayFunc(display);
 
     /*
         <glutKeyboardFunc>:
-        Determina a fun√ß√£o de manipula√ß√£o de comandos do teclado da janela atual.
+        Determina a funÁ„o de manipulaÁ„o de comandos do teclado da janela atual.
     */
     glutKeyboardFunc(key);
 
     /*
         <glutMouseFunc>:
-        Determina a fun√ß√£o de controle para comandos do mouse da janela atual.
+        Determina a funÁ„o de controle para comandos do mouse da janela atual.
 
     */
     glutMouseFunc(mouseclick);
 
     /*
         <glutPassiveMotionFunc>:
-        Estabelece a fun√ß√£o que √© chamada pela GLUT cada vez que o mouse √© movido sobre a janela corrente
-        enquanto nenhum de seus bot√µes est√° pressionado. Par√¢metros de entrada da fun√ß√£o callback:
-        (int x, int y). Os par√¢metros x e y indicam a posi√ß√£o do mouse em coordenadas da janela.
+        Estabelece a funÁ„o que È chamada pela GLUT cada vez que o mouse È movido sobre a janela corrente
+        enquanto nenhum de seus botıes est· pressionado. Par‚metros de entrada da funÁ„o callback:
+        (int x, int y). Os par‚metros x e y indicam a posiÁ„o do mouse em coordenadas da janela.
     */
     glutPassiveMotionFunc(mousedrag);
 
-	/*
-		<init>:
-		Inicia alguns componentes b√°sicos para utiliza√ß√£o do editor.
-	*/
+    /*
+    	<init>:
+    	Inicia alguns componentes b·sicos para utilizaÁ„o do editor.
+    */
     init();
-	
-	/*
-		<glutMainLoop>:
-		Inicia o loop de processamento de desenhos com GLUT. Esta rotina deve ser chamada pelo menos uma vez em um programa que utilize a biblioteca GLUT.
-	*/
+
+    /*
+    	<glutMainLoop>:
+    	Inicia o loop de processamento de desenhos com GLUT. Esta rotina deve ser chamada pelo menos uma vez em um programa que utilize a biblioteca GLUT.
+    */
     glutMainLoop();
 
     return 0;
