@@ -7,25 +7,27 @@
 
 using namespace std;
 
-int ordem = 0;
+int ordem = 0;//sequencial de ordem dos desenhos.
 
+//Aloca o espaço necessário na memória para a estrutura, e inicializa os ponteiros para não dar chance de erros. 
 Desenho* inicia_desenho()
 {
-    Desenho *novo = (Desenho*)malloc(sizeof(Desenho));
-    if(!novo)
+    Desenho *novo = (Desenho*)malloc(sizeof(Desenho));//aloca o espaço na memória
+    if(!novo)   //caso novo não exista, então ocorreu algum erro.
     {
         printf("ERRO AO ALOCAR MEMORIA PARA O DESENHO");
     }
+    //Inicializações
     novo->prox = NULL;
     novo->ant = NULL;
     novo->ordemDesenho = ordem;
     ordem++;
     novo->vertices = NULL;
     novo->qtdVertices = 0;
-    ordem++;
     return novo;
 }
 
+//Aloca espaço para a estrutura e inicializa os ponteiros.
 Vertice* cria_vertice(int x,int y)
 {
     Vertice *novo = (Vertice*)malloc(sizeof(Vertice));
@@ -39,18 +41,21 @@ Vertice* cria_vertice(int x,int y)
     return novo;
 }
 
+//Função para debugar a cor.
 void imprime_cor(Cor c)
 {
     printf("R: %f     G: %f     B: %f    T: %f",c.r,c.g,c.b,c.t);
 }
 
+//Função recursiva para debugar os vértices do polígono.
 void imprime_vertices(Vertice* ve)
 {
     printf("X: %d   Y: %d\n",ve->x,ve->y);
     if(ve->prox)
-        imprime_vertices(ve->prox);
+        imprime_vertices(ve->prox);//chama a função novamente com o próximo vértice da lista.
 }
 
+//Função para debugar as informações do poligono contida em toda a estrutura, basta chamar esta função e ela imprimirá em conjunto os vértices e a cor.
 void imprime_info_desenhos(ListaD* lista)
 {
     if(lista->head == NULL)
@@ -76,15 +81,16 @@ void imprime_info_desenhos(ListaD* lista)
 
 }
 
+//Função genérica de lista duplamente encadeada para adicionar um item à lista.
 void adiciona_vertice_desenho(Desenho* pol,Vertice* ve)
 {
-    if(!pol->vertices) //Logo não contem nenhum vertice.
+    if(!pol->vertices) //Logo não contem nenhum vertice, então adiciona o endereço do primeiro vértice na estrutura Desenho.
     {
         pol->vertices = ve;
         ve->ant = NULL;
-        pol->qtdVertices++;
+        pol->qtdVertices++; //Cada vértice adicionado, incrementa a qtd de vértices.
     }
-    else
+    else    //já existe um vértice no desenho, então adiciona o vértice novo no final da lista.
     {
         Vertice* tmp = pol->vertices;
         while(tmp->prox != NULL)
@@ -93,19 +99,20 @@ void adiciona_vertice_desenho(Desenho* pol,Vertice* ve)
         }
         tmp->prox = ve;
         ve->ant = tmp;
-        pol->qtdVertices++;
+        pol->qtdVertices++; //Cada vértice adicionado, incrementa a qtd de vértices.
 
     }
 }
 
+//Função genérica de lista duplamente encadeada para adicionar um item à lista.
 void adiciona_novo_desenho(ListaD* lista, Desenho* novo)
 {
-    if(!lista->head)
+    if(!lista->head)    //Logo não contem nenhum desenho, então adiciona o endereço do primeiro desenho na estrutura ListaD.
     {
         lista->head = novo;
         lista->head->ordemDesenho++;
     }
-    else
+    else    //já existe um desenho na lista, então adiciona o desenho novo no final da lista.
     {
         Desenho* tmp = lista->head;
         while(tmp->prox != NULL)
@@ -117,6 +124,7 @@ void adiciona_novo_desenho(ListaD* lista, Desenho* novo)
     }
 }
 
+//Função que define o "envelope" do poligono"
 Desenho* clica_desenho(ListaD* lista, int x, int y)
 {
     if(lista->head)
@@ -124,16 +132,16 @@ Desenho* clica_desenho(ListaD* lista, int x, int y)
 
         Desenho* tmp_desenho = lista->head;
         Desenho* tmp_desenho_ret = NULL;
-        while(tmp_desenho)
+        while(tmp_desenho) //Varre toda a lista de polígonos
         {
             int minX,minY,maxX,maxY;
-            int flg_first = 1;
-            if(tmp_desenho->vertices)
+            int flg_first = 1;//Primeiro vértice
+            if(tmp_desenho->vertices) //Varre toda a lista de vértices do polígono.
             {
                 Vertice* tmp_vertice = tmp_desenho->vertices;
                 while(tmp_vertice)
                 {
-                    if(flg_first)
+                    if(flg_first)//Se for o primeiro poligono a ser verificado, seus valores serão todos os extremos do envelope.
                     {
                         minX = tmp_vertice->x;
                         minY = tmp_vertice->y;
@@ -143,29 +151,29 @@ Desenho* clica_desenho(ListaD* lista, int x, int y)
                     }
                     else
                     {
-                        if(tmp_vertice->x < minX)
+                        if(tmp_vertice->x < minX)       //Verifica se o vértice X atual é menor que o menor vértice X até o momento. 
                         {
-                            minX = tmp_vertice->x;
+                            minX = tmp_vertice->x;      //Se sim, então este é o novo mínimo X do polígono.
                         }
-                        else if(tmp_vertice->x > maxX)
+                        else if(tmp_vertice->x > maxX)  //Verifica se o vértice X atual é maior que o maior vértice X até o momento. 
                         {
-                            maxX = tmp_vertice->x;
+                            maxX = tmp_vertice->x;      //Se sim, então este é o novo máximo X do polígono.
                         }
-                        if(tmp_vertice->y < minY)
+                        if(tmp_vertice->y < minY)       //Verifica se o vértice Y atual é menor que o menor vértice Y até o momento.
                         {
-                            minY = tmp_vertice->y;
+                            minY = tmp_vertice->y;      //Se sim, então este é o novo mínimo Y do polígono.
                         }
-                        else if(tmp_vertice->y > maxY)
+                        else if(tmp_vertice->y > maxY)  //Verifica se o vértice Y atual é maior que o maior vértice Y até o momento.
                         {
-                            maxY = tmp_vertice->y;
+                            maxY = tmp_vertice->y;      //Se sim, então este é o novo máximo Y do polígono.
                         }
                     }
-                    tmp_vertice = tmp_vertice->prox;
+                    tmp_vertice = tmp_vertice->prox;    //Vai para o próximo vértice.
                 }
             }
-            if(x <= maxX && x >= minX && y <= maxY && y >= minY)
+            if(x <= maxX && x >= minX && y <= maxY && y >= minY)    //verifica se as coordenadas do mouse se encontram dentro do intervalo de vértices da função
             {
-                tmp_desenho_ret = tmp_desenho;
+                tmp_desenho_ret = tmp_desenho; //salva o endereço em uma variável temporária de retorno, assim o caso exita mais de um desenho na mesma posição, ele retorna o mais novo(ou mais a cima).
             }
             tmp_desenho = tmp_desenho->prox;
         }
@@ -173,17 +181,19 @@ Desenho* clica_desenho(ListaD* lista, int x, int y)
     }
     else
     {
-        printf("LISTA DE DESENHOS VAZIO!\n");
+        //printf("LISTA DE DESENHOS VAZIO!\n");
     }
 
 }
 
+//Função para mover os vértices de um poligono dada as variações nos eixos X e Y.
 void move_desenho(Desenho* pol, int varx,int vary)
 {
     if(pol->vertices)
     {
         Vertice* tmp_vert = pol->vertices;
 
+        //Varre os vértices do polígono, somando as coordenadas X com a variação X, e as coordenadas Y com a variação Y.
         while(tmp_vert != NULL)
         {
             tmp_vert->x = tmp_vert->x + (varx);
@@ -207,7 +217,7 @@ void apaga_desenho(ListaD* lista,Desenho* pol)
             lista->head = NULL;
         }
     }
-    else
+    else //remove um desenho dentro da lista
     {
         if(pol->prox != NULL)
         {
@@ -293,18 +303,18 @@ void espelhamento(Desenho* pol) // realiza o espelhamento do poligono selecionad
 int salva_arquivo(char* nome,ListaD* desenhos)
 {
     FILE* arq;
-    arq = fopen(nome,"w+");
+    arq = fopen(nome,"w+"); //abre o arrquivo, ou cria caso não exita
     if(arq == NULL)
     {
         printf("Erro ao abrir arquivo.\n");
         return -1;
     }
     Desenho* tmp = desenhos->head;
-    while(tmp != NULL)
+    while(tmp != NULL)  //varre os desenhos armazenando as informações no arquivo
     {
-        fprintf(arq,"D\n");
-        fprintf(arq,"%f,%f,%f,%f\n",tmp->corPolig.r,tmp->corPolig.g,tmp->corPolig.b,tmp->corPolig.t);
-        if(tmp->vertices != NULL)
+        fprintf(arq,"D\n"); //Primeira linha - Indica que é um novo desenho
+        fprintf(arq,"%f,%f,%f,%f\n",tmp->corPolig.r,tmp->corPolig.g,tmp->corPolig.b,tmp->corPolig.t); //Segunda linha - Indica a cor do polígono no formato R,G,B,A
+        if(tmp->vertices != NULL) //Terceira linha indica os vértices no formato x1,y1 x2,y2 ... xn,yn na mesma linha.
         {
             Vertice* tmp_v = tmp->vertices;
             while(tmp_v != NULL)
@@ -314,28 +324,37 @@ int salva_arquivo(char* nome,ListaD* desenhos)
             }
         }
         tmp=tmp->prox;
-        fprintf(arq,"\n");
+        fprintf(arq,"\n");//quebra de linha, representa o fim dos vértices
     }
 
-    fclose(arq);
+    fclose(arq);//fecha o arquivo
 }
 
 ListaD* carrega_arquivo(char* nome)
 {
     FILE* arq;
-    arq = fopen(nome,"r+");
-    ListaD* lista = (ListaD*)malloc(sizeof(ListaD));
-    lista->head = NULL;
+    arq = fopen(nome,"r+"); //abre o arquivo.
+    ListaD* lista = (ListaD*)malloc(sizeof(ListaD)); //aloca espaço para a lista.
+    lista->head = NULL; //inicializa.
 
     char ch;
     if(arq == NULL)
     {
         printf("Problema ao abrir arquivo.\n");
     }
+    /*
+        Começa a ler as informações dos poligonos no arquivo, que se encontram no seguinte formato:
+        D
+        R,G,B,A
+        x1,y1 x2,y2 x3,y3 ... xn,yn
+        D
+        R,G,B,A
+        x1,y1 x2,y2 x3,y3 ... xn,yn
+    */
     while((ch=fgetc(arq)) != EOF)
     {
         printf("%c",ch);
-        if(ch == 'D')
+        if(ch == 'D')//encontra um novo polígono
         {
             Desenho* novo = inicia_desenho();
             fgetc(arq);
@@ -344,7 +363,7 @@ ListaD* carrega_arquivo(char* nome)
             char arrayCor[4][8]= {NULL};
             int index = 0;
 
-            //Ler cores
+            //Ler os valores das cores como "string"
             while((ch=fgetc(arq)) != '\n')
             {
                 if(ch != ',')
@@ -352,12 +371,13 @@ ListaD* carrega_arquivo(char* nome)
                     arrayCor[index][contador]=ch;
                     contador++;
                 }
-                else if(ch == ',')
+                else if(ch == ',')//proximo valor
                 {
                     index++;
                     contador = 0;
                 }
             }
+            //Converte o valor das cores para float.
             novo->corPolig.r = atof(arrayCor[0]);
             novo->corPolig.g = atof(arrayCor[1]);
             novo->corPolig.b = atof(arrayCor[2]);
@@ -369,28 +389,29 @@ ListaD* carrega_arquivo(char* nome)
             Vertice* n_vert = NULL;
             int flg_y=0;
 
-            while((ch=fgetc(arq)) != '\n')
+            //Lê os vértices x,y...
+            while((ch=fgetc(arq)) != '\n')//Enquanto estiver na mesma linha
             {
-                if((ch != ',' && !isspace(ch))&& flg_y == 0)
+                if((ch != ',' && !isspace(ch))&& flg_y == 0)//lê todos os numeros para a coordenada X
                 {
                     arrayVerticeX[index]=ch;
                     index++;
                 }
-                else if((ch != ',' && !isspace(ch))&& flg_y ==1)
+                else if((ch != ',' && !isspace(ch))&& flg_y ==1)//Lê todos os numeros para a coordenada Y
                 {
                     arrayVerticeY[index]=ch;
                     index++;
                 }
-                else if(ch == ',')
+                else if(ch == ',')//Terminou de ler X
                 {
                     flg_y = 1;
                     index = 0;
                 }
-                else if(isspace(ch))
+                else if(isspace(ch))//Terminou de ler X e Y
                 {
                     flg_y = 0;
                     index = 0;
-                    n_vert = cria_vertice(atoi(arrayVerticeX),atoi(arrayVerticeY));
+                    n_vert = cria_vertice(atoi(arrayVerticeX),atoi(arrayVerticeY)); //Converte de "string" para int
                     adiciona_vertice_desenho(novo,n_vert);
                     n_vert = NULL;
 
@@ -409,6 +430,7 @@ ListaD* carrega_arquivo(char* nome)
     return lista;
 }
 
+//calcula a distância entre os dois pontos e retorna.
 double distancia_entre_2pt(int x1,int x2,int y1,int y2)
 {
     return sqrt(pow(x2-x1,2)+pow(y2-y1,2));
